@@ -1,0 +1,2 @@
+git+git://github.com/elfi-dev/elfi.git
+git+git://github.com/akangasr/elfie.git
