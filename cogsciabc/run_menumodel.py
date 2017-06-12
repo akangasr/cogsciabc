@@ -74,9 +74,11 @@ def run_experiment(seed=1):
                     #(0,1),
                     #(0,1)
                     ),
-                n_samples=20,
-                n_initial_evidence=10,
-                parallel_batches=5,
+                n_samples=6,
+                n_initial_evidence=2,
+                parallel_batches=2,
+                gp_params_update_interval=2,
+                batch_size=1,
                 sampling_type="uniform",
                 seed=args["seed"])
 

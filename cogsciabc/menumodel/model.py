@@ -29,6 +29,9 @@ class MenuParams():
         for k, v in locals().items():
             setattr(self, k, v)
 
+class DataObject():
+    def __init__(self, data):
+        self.data = data
 
 class Observation():
     """ Summary observation: task completion in one of the possible scenarios:
@@ -76,8 +79,8 @@ def get_model(p, elfi_p, rl_p, observation):
                 task=task)
     model = elfi_p[0].model
     simulator = elfi.Simulator(elfi.tools.vectorize(rl),
-                               *[p for p in elfi_p],
-                               observed=observation,
+                               *elfi_p,
+                               observed=DataObject(observation),
                                model=model,
                                name="simulator")
     summary = elfi.Summary(elfi.tools.vectorize(summary_function),
@@ -91,21 +94,21 @@ def get_model(p, elfi_p, rl_p, observation):
     return model
 
 
-def summary_function(self, obs):
-    return [Observation(ses["action_duration"], ses["target_present"]) for ses in obs.data["sessions"]]
+def summary_function(obs):
+    return DataObject([Observation(ses["action_duration"], ses["target_present"]) for ses in obs.data["sessions"]])
 
 
 def discrepancy_function(*simulated, observed=None):
-    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated[0])
-    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed[0])
-    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated[0])
-    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed[0])
+    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated[0].data)
+    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed[0].data)
+    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated[0].data)
+    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed[0].data)
     disc = np.abs(tct_mean_pre_obs - tct_mean_pre_sim) ** 2 \
             + np.abs(tct_std_pre_obs - tct_std_pre_sim) \
             + np.abs(tct_mean_abs_obs - tct_mean_abs_sim) ** 2 \
             + np.abs(tct_std_abs_obs - tct_std_abs_sim)
-    disc /= 1000000.0  # scaling
-    return disc
+    disc = float(disc / 1000000.0)  # scaling
+    return np.array([disc])
 
 
 def _tct_mean_std(present, obs):
