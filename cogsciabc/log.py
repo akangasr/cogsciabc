@@ -12,7 +12,9 @@ def logging_setup():
 
     _set_log("cogsciabc", logging.INFO, [ch])
     _set_log("elfi", logging.INFO, [ch])
+    _set_log("elfi.methods", logging.DEBUG, [ch])
     _set_log("elfie", logging.INFO, [ch])
+    _set_log("elfie.mpi", logging.INFO, [ch])
     _set_log("elfirl", logging.INFO, [ch])
 
 def _set_log(name, level, handlers):
