@@ -4,13 +4,14 @@ import sys
 import matplotlib
 matplotlib.use('Agg')
 
+import elfi
 from elfie.bolfi_extensions import BolfiParams, BolfiFactory
 from elfie.inference import inference_experiment
 from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
 from elfirl.model import RLParams
 
-from menumodel.model import get_model
+from menumodel.model import MenuParams, get_model
 from menumodel.observation import BaillyData
 from log import logging_setup
 from args import parse_args

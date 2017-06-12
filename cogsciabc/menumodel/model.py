@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
     Chen et al. CHI 2016 and Kangasraasio et al. CHI 2017
 """
 
-class MenuParameters():
+class MenuParams():
 
    def __init__(self,
                 menu_type="semantic",
@@ -54,7 +54,7 @@ class Observation():
         return Observation(self.task_completion_time, self.target_present)
 
 
-def get_model(self, p, elfi_p, observation):
+def get_model(p, elfi_p, observation):
     env = SearchEnvironment(
                 menu_type=p.menu_type,
                 menu_groups=p.menu_groups,
