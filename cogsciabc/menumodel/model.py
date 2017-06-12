@@ -2,8 +2,8 @@ import numpy as np
 
 import elfi
 from elfirl.model import RLModel, RLParams
-from .mdp import SearchEnvironment, SearchTask
-from .features import get_feature_set, plot_features
+from cogsciabc.menumodel.mdp import SearchEnvironment, SearchTask
+from cogsciabc.menumodel.features import get_feature_set, plot_features
 
 import logging
 logger = logging.getLogger(__name__)

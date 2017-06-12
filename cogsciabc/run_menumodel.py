@@ -12,10 +12,10 @@ from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
 from elfirl.model import RLParams
 
-from menumodel.model import MenuParams, get_model
-from menumodel.observation import BaillyData
-from log import logging_setup
-from args import parse_args
+from cogsciabc.menumodel.model import MenuParams, get_model
+from cogsciabc.menumodel.observation import BaillyData
+from cogsciabc.log import logging_setup
+from cogsciabc.args import parse_args
 
 import logging
 logger = logging.getLogger(__name__)
