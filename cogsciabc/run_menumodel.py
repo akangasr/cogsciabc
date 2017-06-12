@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import partial
 
 import matplotlib
 matplotlib.use('Agg')
@@ -79,7 +80,7 @@ def run_experiment(seed=1):
                 sampling_type="uniform",
                 seed=args["seed"])
 
-    model = get_model(menu_params, elfi_params, training_data)
+    model = get_model(menu_params, elfi_params, rl_params, training_data)
     inference_factory = BolfiFactory(model, bolfi_params)
 
     file_path = os.path.dirname(os.path.realpath(__file__))

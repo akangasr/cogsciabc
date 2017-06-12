@@ -54,7 +54,7 @@ class Observation():
         return Observation(self.task_completion_time, self.target_present)
 
 
-def get_model(p, elfi_p, observation):
+def get_model(p, elfi_p, rl_p, observation):
     env = SearchEnvironment(
                 menu_type=p.menu_type,
                 menu_groups=p.menu_groups,
@@ -65,13 +65,13 @@ def get_model(p, elfi_p, observation):
                 length_observations=p.length_observations,
                 p_obs_len_cur=p.p_obs_len_cur,
                 p_obs_len_adj=p.p_obs_len_adj,
-                n_training_menus=n_training_menus)
+                n_training_menus=p.n_training_menus)
     task = SearchTask(
                 env=env,
                 max_number_of_actions_per_session=p.max_number_of_actions_per_session)
     rl = RLModel(
-                rl_params=rl_params,
-                parameters=[p.name for p in elfi_p],
+                rl_params=rl_p,
+                parameter_names=[p.name for p in elfi_p],
                 env=env,
                 task=task)
     model = elfi_p[0].model
@@ -88,6 +88,7 @@ def get_model(p, elfi_p, observation):
                                    summary,
                                    model=model,
                                    name="discrepancy")
+    return model
 
 
 def summary_function(self, obs):
