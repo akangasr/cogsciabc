@@ -1,9 +1,9 @@
 import numpy as np
 
-from cogsciabc.menumodel.mdp import SearchEnvironment, SearchTask
-from cogsciabc.menumodel.features import get_feature_set, plot_features
-from elfirl.model import RLModel, RLParams
 import elfi
+from elfirl.model import RLModel, RLParams
+from .mdp import SearchEnvironment, SearchTask
+from .features import get_feature_set, plot_features
 
 import logging
 logger = logging.getLogger(__name__)

@@ -10,10 +10,10 @@ from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
 from elfirl.model import RLParams
 
-from cogsciabc.menumodel.model import MenuModelFactory
-from cogsciabc.menumodel.observation import BaillyData
-from cogsciabc.log import logging_setup
-from cogsciabc.args import parse_args
+from menumodel.model import get_model
+from menumodel.observation import BaillyData
+from log import logging_setup
+from args import parse_args
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,14 +21,14 @@ logger = logging.getLogger(__name__)
 def run_experiment(seed=1):
     training_data = BaillyData(
                 menu_type="Semantic",
-                allowed_users=list(),
-                excluded_users=list("S20", "S21", "S22", "S23", "S24"),
+                allowed_users=[],
+                excluded_users=["S20", "S21", "S22", "S23", "S24"],
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get()  # all
     test_data = BaillyData(
                 menu_type="Semantic",
-                allowed_users=list("S20", "S21", "S22", "S23", "S24"),
-                excluded_users=list(),
+                allowed_users=["S20", "S21", "S22", "S23", "S24"],
+                excluded_users=[],
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get()  # all
     rl_params = RLParams(
