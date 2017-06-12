@@ -8,11 +8,11 @@ from elfie.bolfi_extensions import BolfiParams, BolfiFactory
 from elfie.inference import inference_experiment
 from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
+from elfirl.model import RLParams
 
 from cogsciabc.menumodel.model import MenuModelFactory
 from cogsciabc.menumodel.observation import BaillyData
-from cogsciabc.rl.simulator import RLParams
-from cogsciabc.logging import logging_setup
+from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
 
 import logging
