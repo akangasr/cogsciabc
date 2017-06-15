@@ -64,7 +64,7 @@ def _sim(*params, random_state=None, index_in_batch=None):
                                stderr=subprocess.STDOUT,
                                shell=True)
     output = process.communicate()[0].decode("utf-8")
-    # TODO: error handling
+    # TODO: error handling?
     return _parse_results(output)
 
 

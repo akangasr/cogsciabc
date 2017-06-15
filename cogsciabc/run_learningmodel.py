@@ -28,8 +28,8 @@ def run_experiment(seed=1):
                max_retries=5,
                )
     elfi_params = [
-                elfi.Prior("uniform", -3.0, 0.7, name="a"),
-                elfi.Prior("uniform", 0.05, 0.1, name="b"),
+                elfi.Prior("uniform", -3.0, 0.7, name="p1_RT"),
+                elfi.Prior("uniform", 0.05, 0.1, name="p2_LF"),
                 ]
     bolfi_params = BolfiParams(
                 bounds=(
@@ -39,9 +39,9 @@ def run_experiment(seed=1):
                     #(0,1)
                     ),
                 n_samples=100,
-                n_initial_evidence=10,
+                n_initial_evidence=12,
                 parallel_batches=4,
-                gp_params_update_interval=4,
+                gp_params_update_interval=8,
                 batch_size=1,
                 sampling_type="uniform",
                 seed=args["seed"])
