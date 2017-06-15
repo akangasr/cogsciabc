@@ -80,7 +80,7 @@ def get_model(p, elfi_p, rl_p, observation):
     model = elfi_p[0].model
     simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                *elfi_p,
-                               observed=DataObject(observation),
+                               observed=observation,
                                model=model,
                                name="simulator")
     summary = elfi.Summary(elfi.tools.vectorize(summary_function),

@@ -5,6 +5,8 @@ from functools import partial
 import matplotlib
 matplotlib.use('Agg')
 
+import numpy as np
+
 import elfi
 from elfie.bolfi_extensions import BolfiParams, BolfiFactory
 from elfie.inference import inference_experiment
@@ -12,7 +14,7 @@ from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
 from elfirl.model import RLParams
 
-from cogsciabc.menumodel.model import MenuParams, get_model
+from cogsciabc.menumodel.model import MenuParams, get_model, DataObject
 from cogsciabc.menumodel.observation import BaillyData
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
@@ -54,7 +56,8 @@ def run_experiment(seed=1):
                 n_training_menus=10000,
                 max_number_of_actions_per_session=20)
     elfi_params = [
-                elfi.Prior("truncnorm", -3, 3, 3, 1,
+                #elfi.Prior("truncnorm", -3, 3, 3, 1,
+                elfi.Prior("uniform", 0, 6,
                 #elfi.Constant(2.8,
                             name="focus_duration_100ms"),
                 #elfi.Prior("truncnorm", -1, 0.7/0.3, 0.3, 0.3,  # TODO
@@ -82,13 +85,13 @@ def run_experiment(seed=1):
                 sampling_type="uniform",
                 seed=args["seed"])
 
-    model = get_model(menu_params, elfi_params, rl_params, training_data)
+    model = get_model(menu_params, elfi_params, rl_params, DataObject(training_data))
     inference_factory = BolfiFactory(model, bolfi_params)
 
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
-                  test_data=test_data)
+                  test_data=DataObject(test_data))
     run_and_report(exp, file_path)
 
 
