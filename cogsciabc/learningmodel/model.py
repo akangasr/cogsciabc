@@ -67,7 +67,6 @@ def _sim(*params, random_state=None, index_in_batch=None):
                                stderr=subprocess.STDOUT,
                                shell=True)
     output = process.communicate()[0].decode("utf-8")
-    # TODO: error handling?
     return _parse_results(output)
 
 
@@ -188,7 +187,7 @@ def summary_function(obs):
                 mean = float(np.mean(vals))
                 std = float(np.std(vals))
                 ret.append(Summary(stage, height, response, mean, std))
-    return DataObject(ret)
+    return np.array([DataObject(ret)], dtype=object)
 
 
 def discrepancy_function(*simulated, observed=None):
