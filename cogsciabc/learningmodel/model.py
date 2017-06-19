@@ -3,6 +3,7 @@ import subprocess
 import numpy as np
 
 import elfi
+from elfie.serializable import Serializable
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,8 +27,9 @@ class DataObject():
         self.data = data
 
 
-class Observation():
+class Observation(Serializable):
     def __init__(self, stage, height, response, val):
+        super().__init__(self)
         self.stage = int(stage)
         self.height = int(height)
         self.response = "{}".format(response).strip("\"")
@@ -41,8 +43,9 @@ class Observation():
                 self.stage, self.height, self.response, self.val)
 
 
-class Summary():
+class Summary(Serializable):
     def __init__(self, stage, height, response, mean, std):
+        super().__init__(self)
         self.stage = int(stage)
         self.height = int(height)
         self.response = "{}".format(response).strip("\"")
