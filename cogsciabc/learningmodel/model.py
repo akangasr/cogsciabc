@@ -1,9 +1,13 @@
 import os
+import traceback
 import subprocess
 import numpy as np
 
 import elfi
 from elfie.serializable import Serializable
+
+import matplotlib
+from matplotlib import pyplot as pl
 
 import logging
 logger = logging.getLogger(__name__)
@@ -139,6 +143,44 @@ def get_model(p, elfi_p, observation):
                                    model=model,
                                    name="discrepancy")
     return model
+
+
+def plot_data(pdf, figsize, data, suptitle):
+    fs = (figsize[0], figsize[0]/2.0)
+    fig, axarr = pl.subplots(1,3,figsize=fs)
+    fig.suptitle(suptitle)
+    try:
+        i = 0
+        for stage in [1,2,3]:
+            responses = ["encode", "solve", "respond"]
+            ax = axarr[i]
+            ax.set_title("Learning Phase {}".format(stage))
+            ax.set_ylim(-0.5, 10)
+            ax.set_xlim(-0.5, 2.5)
+            ax.set_xticks([0, 1, 2])
+            ax.set_xticklabels(responses)
+            if i == 0:
+                ax.set_ylabel("Mean stage duration (Sec.)")
+            if i == 1:
+                ax.set_xlabel("Cognitive Stages within Learning Phases")
+            for height, color in zip([3,4,5], ["orange", "green", "blue"]):
+                x = [0, 1, 2]
+                means = list()
+                stds = list()
+                for response in responses:
+                    for s in data:
+                        if s.stage == stage and s.height == height and s.response == response:
+                            means.append(s.mean)
+                            stds.append(s.std)
+                ax.errorbar(x, means, yerr=stds, fmt='-o', color=color, label="Height {}".format(height))
+            i += 1
+        pl.tight_layout(pad=2.0)
+    except Exception as e:
+        fig.text(0.02, 0.02, "Was not able to plot data: {}".format(e))
+        tb = traceback.format_exc()
+        logger.critical(tb)
+    pdf.savefig()
+    pl.close()
 
 
 def get_dataset():
