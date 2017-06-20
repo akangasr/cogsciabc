@@ -9,11 +9,12 @@ import numpy as np
 
 import elfi
 from elfie.bolfi_extensions import BolfiParams, BolfiFactory
-from elfie.inference import inference_experiment
+from elfie.inference import inference_experiment, get_sample_pool
 from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
+from elfie.params import ModelParams
 
-from cogsciabc.learningmodel.model import LearningParams, get_model, get_dataset, DataObject
+from cogsciabc.learningmodel.model import LearningParams, get_model, get_dataset, DataObject, plot_data
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
 
@@ -21,37 +22,53 @@ import logging
 logger = logging.getLogger(__name__)
 
 def run_experiment(seed=1):
+    p = ModelParams([
+        {"name": "RT",
+         "distr": "truncnorm",
+         "minv": -4.0,
+         "maxv": -2.3,
+         "mean": -3.0,
+         "std": 0.5,
+         "acq_noise": 0.05,
+         "tics": np.linspace(-4.0, -2.3, 10).tolist(),
+         },
+        {"name": "LF",
+         "distr": "truncnorm",
+         "minv": 0.01,
+         "maxv": 0.15,
+         "mean": 0.10,
+         "std": 0.05,
+         "acq_noise": 0.005,
+         "tics": np.linspace(0.01, 0.15, 10).tolist(),
+         },
+        ])
     training_data = get_dataset()
     model_params = LearningParams(
-               sample_size=6,
+               sample_size=2,
                sample_d=0.005,
                max_retries=5,
                )
-    elfi_params = [
-                elfi.Prior("uniform", -3.0, 0.7, name="p1_RT"),
-                elfi.Prior("uniform", 0.05, 0.1, name="p2_LF"),
-                ]
     bolfi_params = BolfiParams(
-                bounds=(
-                    (-3.0,-2.3),
-                    (0.05,0.15),
-                    #(0,1),
-                    #(0,1)
-                    ),
+                bounds=p.get_bounds(),
                 n_samples=100,
                 n_initial_evidence=12,
                 parallel_batches=4,
-                gp_params_update_interval=8,
+                gp_params_update_interval=4,
                 batch_size=1,
+                grid_tics=p.get_grid_tics(),
                 sampling_type="uniform",
+                acq_noise_cov=p.get_acq_noises(),
+#                pool=get_sample_pool("/m/home/home2/20/akangasr/unix/cogsciabc/cogsciabc/results2.json"),
                 seed=args["seed"])
 
-    model = get_model(model_params, elfi_params, DataObject(training_data))
+    model = get_model(model_params, p.get_elfi_params(), DataObject(training_data))
     inference_factory = BolfiFactory(model, bolfi_params)
 
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
-                  inference_factory)
+                  inference_factory,
+                  obs_data=training_data,
+                  plot_data=plot_data)
     run_and_report(exp, file_path)
 
 
