@@ -12,9 +12,10 @@ from elfie.bolfi_extensions import BolfiParams, BolfiFactory
 from elfie.inference import inference_experiment
 from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
+from elfie.params import ModelParams
 from elfirl.model import RLParams
 
-from cogsciabc.menumodel.model import MenuParams, get_model, DataObject
+from cogsciabc.menumodel.model import MenuParams, get_model, summary_function
 from cogsciabc.menumodel.observation import BaillyData
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
@@ -23,22 +24,67 @@ import logging
 logger = logging.getLogger(__name__)
 
 def run_experiment(seed=1):
-    training_data = BaillyData(
+    p = ModelParams([
+        {"name": "focus_duration_100ms",
+         "distr": "truncnorm",
+         "minv": 0.0,
+         "maxv": 6.0,
+         "mean": 3.0,
+         "std": 1.0,
+         "acq_noise": 0.1,
+         "ntics": 10,
+         },
+        {"name": "selection_delay_s",
+         "distr": "constant",
+         "val": 0.3,
+         #"distr": "truncnorm",
+         "minv": 0.0,
+         "maxv": 1.0,
+         "mean": 0.3,
+         "std": 0.3,
+         "acq_noise": 0.05,
+         "ntics": 10,
+         },
+        {"name": "menu_recall_probability",
+         "distr": "constant",
+         "val": 0.69,
+         #"distr": "truncnorm",
+         "minv": 0.0,
+         "maxv": 1.0,
+         "mean": 0.69,
+         "std": 0.2,
+         "acq_noise": 0.05,
+         "ntics": 10,
+         },
+        {"name": "p_obs_adjacent",
+         "distr": "constant",
+         "val": 0.93,
+         #"distr": "truncnorm",
+         "minv": 0.0,
+         "maxv": 1.0,
+         "mean": 0.93,
+         "std": 0.2,
+         "acq_noise": 0.05,
+         "ntics": 10,
+         },
+        ])
+
+    training_data = summary_function(BaillyData(
                 menu_type="Semantic",
                 allowed_users=[],
                 excluded_users=["S20", "S21", "S22", "S23", "S24"],
                 trials_per_user_present=9999,  # all
-                trials_per_user_absent=9999).get()  # all
-    test_data = BaillyData(
+                trials_per_user_absent=9999).get())  # all
+    test_data = summary_function(BaillyData(
                 menu_type="Semantic",
                 allowed_users=["S20", "S21", "S22", "S23", "S24"],
                 excluded_users=[],
                 trials_per_user_present=9999,  # all
-                trials_per_user_absent=9999).get()  # all
+                trials_per_user_absent=9999).get())  # all
     rl_params = RLParams(
-                n_training_episodes=2000,
-                n_episodes_per_epoch=1000,
-                n_simulation_episodes=10000,
+                n_training_episodes=20,
+                n_episodes_per_epoch=10,
+                n_simulation_episodes=10,
                 q_alpha=0.1,
                 q_gamma=0.98,
                 exp_epsilon=0.1,
@@ -55,43 +101,27 @@ def run_experiment(seed=1):
                 p_obs_len_adj=0.89,
                 n_training_menus=10000,
                 max_number_of_actions_per_session=20)
-    elfi_params = [
-                #elfi.Prior("truncnorm", -3, 3, 3, 1,
-                elfi.Prior("uniform", 0, 6,
-                #elfi.Constant(2.8,
-                            name="focus_duration_100ms"),
-                #elfi.Prior("truncnorm", -1, 0.7/0.3, 0.3, 0.3,  # TODO
-                elfi.Constant(0.29,
-                            name="selection_delay_s"),
-                #elfi.Prior("truncnorm", -0.69/0.2, (1-0.69)/0.2, 0.69, 0.2,
-                elfi.Constant(0.69,
-                            name="menu_recall_probability"),
-                #elfi.Prior("truncnorm", -0.93/0.2, (1-0.93)/0.2, 0.93, 0.2,
-                elfi.Constant(0.93,
-                            name="p_obs_adjacent")
-                ]
     bolfi_params = BolfiParams(
-                bounds=(
-                    (0,6),
-                    #(0,1),
-                    #(0,1),
-                    #(0,1)
-                    ),
-                n_samples=6,
-                n_initial_evidence=2,
-                parallel_batches=2,
-                gp_params_update_interval=2,
+                bounds=p.get_bounds(),
+                grid_tics=p.get_grid_tics(),
+                acq_noise_cov=p.get_acq_noises(),
+                n_samples=10,
+                n_initial_evidence=10,
+                parallel_batches=5,
+                gp_params_update_interval=5,
                 batch_size=1,
                 sampling_type="uniform",
                 seed=args["seed"])
 
-    model = get_model(menu_params, elfi_params, rl_params, DataObject(training_data))
+    model = get_model(menu_params, p.get_elfi_params(), rl_params, training_data)
     inference_factory = BolfiFactory(model, bolfi_params)
 
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
-                  test_data=DataObject(test_data))
+                  test_data=test_data,
+                  obs_data=training_data,
+                  plot_data=None)
     run_and_report(exp, file_path)
 
 

@@ -50,14 +50,14 @@ def run_experiment(seed=1):
                )
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
+                grid_tics=p.get_grid_tics(),
+                acq_noise_cov=p.get_acq_noises(),
                 n_samples=100,
                 n_initial_evidence=12,
                 parallel_batches=4,
                 gp_params_update_interval=4,
                 batch_size=1,
-                grid_tics=p.get_grid_tics(),
                 sampling_type="uniform",
-                acq_noise_cov=p.get_acq_noises(),
 #                pool=get_sample_pool("/m/home/home2/20/akangasr/unix/cogsciabc/cogsciabc/results2.json"),
                 seed=args["seed"])
 
