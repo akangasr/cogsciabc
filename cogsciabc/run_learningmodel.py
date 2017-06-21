@@ -30,7 +30,7 @@ def run_experiment(seed=1):
          "mean": -3.0,
          "std": 0.5,
          "acq_noise": 0.05,
-         "tics": np.linspace(-4.0, -2.3, 10).tolist(),
+         "ntics": 10,
          },
         {"name": "LF",
          "distr": "truncnorm",
@@ -39,7 +39,7 @@ def run_experiment(seed=1):
          "mean": 0.10,
          "std": 0.05,
          "acq_noise": 0.005,
-         "tics": np.linspace(0.01, 0.15, 10).tolist(),
+         "ntics": 10,
          },
         ])
     training_data = get_dataset()
