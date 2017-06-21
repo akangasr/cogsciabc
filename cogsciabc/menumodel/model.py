@@ -1,6 +1,7 @@
 import numpy as np
 
 import elfi
+from elfie.serializable import Serializable
 from elfirl.model import RLModel, RLParams
 from cogsciabc.menumodel.mdp import SearchEnvironment, SearchTask
 from cogsciabc.menumodel.features import get_feature_set, plot_features
@@ -29,15 +30,12 @@ class MenuParams():
         for k, v in locals().items():
             setattr(self, k, v)
 
-class DataObject():
-    def __init__(self, data):
-        self.data = data
-
-class Observation():
+class Observation(Serializable):
     """ Summary observation: task completion in one of the possible scenarios:
         target absent or target present
     """
     def __init__(self, action_durations, target_present):
+        super().__init__(self)
         self.task_completion_time = sum(action_durations)
         self.target_present = (target_present == True)
 
@@ -80,11 +78,11 @@ def get_model(p, elfi_p, rl_p, observation):
     model = elfi_p[0].model
     simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                *elfi_p,
-                               observed=observation,
                                model=model,
                                name="simulator")
     summary = elfi.Summary(elfi.tools.vectorize(summary_function),
                            simulator,
+                           observed=observation,
                            model=model,
                            name="summary")
     discrepancy = elfi.Discrepancy(elfi.tools.vectorize(discrepancy_function),
@@ -95,14 +93,14 @@ def get_model(p, elfi_p, rl_p, observation):
 
 
 def summary_function(obs):
-    return DataObject([Observation(ses["action_duration"], ses["target_present"]) for ses in obs.data["sessions"]])
+    return [Observation(ses["action_duration"], ses["target_present"]) for ses in obs["sessions"]]
 
 
 def discrepancy_function(*simulated, observed=None):
-    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated[0].data)
-    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed[0].data)
-    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated[0].data)
-    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed[0].data)
+    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated[0])
+    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed[0])
+    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated[0])
+    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed[0])
     disc = np.abs(tct_mean_pre_obs - tct_mean_pre_sim) ** 2 \
             + np.abs(tct_std_pre_obs - tct_std_pre_sim) \
             + np.abs(tct_mean_abs_obs - tct_mean_abs_sim) ** 2 \
