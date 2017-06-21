@@ -2,7 +2,7 @@ import math
 import numpy as np
 from enum import IntEnum
 
-from sdirl.rl.pybrain_extensions import ParametricLoggingEpisodicTask, ParametricLoggingEnvironment
+from elfirl.pybrain_extensions import ParametricLoggingEpisodicTask, ParametricLoggingEnvironment
 
 import logging
 logger = logging.getLogger(__name__)
