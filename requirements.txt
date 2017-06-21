@@ -2,3 +2,4 @@
 git+https://github.com/elfi-dev/elfi.git
 git+https://github.com/akangasr/elfie.git
 git+https://github.com/akangasr/elfirl.git
+urllib3
