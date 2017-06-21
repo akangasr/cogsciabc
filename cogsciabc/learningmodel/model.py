@@ -237,7 +237,7 @@ def discrepancy_function(*simulated, observed=None):
     for stage in [1,2,3]:
         for height in [3,4,5]:
             for response in ["encode", "solve", "respond"]:
-                for o in simulated[0].data:
+                for o in simulated[0][0].data:
                     if o.stage == stage and o.height == height and o.response == response:
                         osim = o
                         break
