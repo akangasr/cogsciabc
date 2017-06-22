@@ -14,7 +14,7 @@ from elfie.mpi import mpi_main
 from elfie.reporting import run_and_report
 from elfie.params import ModelParams
 
-from cogsciabc.learningmodel.model import LearningParams, get_model, get_dataset, DataObject, plot_data
+from cogsciabc.learningmodel.model import LearningParams, get_model, get_dataset, plot_data
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
 
@@ -61,7 +61,7 @@ def run_experiment(seed=1):
 #                pool=get_sample_pool("/m/home/home2/20/akangasr/unix/cogsciabc/cogsciabc/results2.json"),
                 seed=args["seed"])
 
-    model = get_model(model_params, p.get_elfi_params(), DataObject(training_data))
+    model = get_model(model_params, p.get_elfi_params(), training_data)
     inference_factory = BolfiFactory(model, bolfi_params)
 
     file_path = os.path.dirname(os.path.realpath(__file__))

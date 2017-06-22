@@ -26,11 +26,6 @@ class LearningParams():
             setattr(self, k, v)
 
 
-class DataObject():
-    def __init__(self, data):
-        self.data = data
-
-
 class Observation(Serializable):
     def __init__(self, stage, height, response, val):
         super().__init__(self)
@@ -123,7 +118,7 @@ class LearningModel():
                         logger.critical("LISP code crashed, max tries reached, aborting.")
                         assert False
                     logger.warning("LISP code crashed at {}, retrying ({}/{})".format(params, i, self.p.max_retries))
-        return DataObject(ret)
+        return ret
 
 
 def get_model(p, elfi_p, observation):
@@ -223,13 +218,13 @@ def summary_function(obs):
         for height in [3,4,5]:
             for response in ["encode", "solve", "respond"]:
                 vals = []
-                for o in obs.data:
+                for o in obs:
                     if o.stage == stage and o.height == height and o.response == response:
                         vals.append(o.val)
                 mean = float(np.mean(vals))
                 std = float(np.std(vals))
                 ret.append(Summary(stage, height, response, mean, std))
-    return np.array([DataObject(ret)], dtype=object)
+    return ret
 
 
 def discrepancy_function(*simulated, observed=None):
@@ -237,11 +232,11 @@ def discrepancy_function(*simulated, observed=None):
     for stage in [1,2,3]:
         for height in [3,4,5]:
             for response in ["encode", "solve", "respond"]:
-                for o in simulated[0][0].data:
+                for o in simulated[0]:
                     if o.stage == stage and o.height == height and o.response == response:
                         osim = o
                         break
-                for o in observed[0].data:
+                for o in observed[0]:
                     if o.stage == stage and o.height == height and o.response == response:
                         oobs = o
                         break
