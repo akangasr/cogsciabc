@@ -68,6 +68,7 @@ def run_experiment(seed=1):
     exp = partial(inference_experiment,
                   inference_factory,
                   obs_data=training_data,
+                  test_data=training_data,
                   plot_data=plot_data)
     run_and_report(exp, file_path)
 
