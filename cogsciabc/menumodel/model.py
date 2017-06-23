@@ -27,7 +27,8 @@ class MenuParams():
                 p_obs_len_adj=0.89,
                 n_training_menus=10000,
                 max_number_of_actions_per_session=20):
-        for k, v in locals().items():
+        d = {k: v for k, v in locals().items()}
+        for k, v in d.items():
             setattr(self, k, v)
 
 class Observation(Serializable):
