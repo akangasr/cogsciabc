@@ -108,17 +108,18 @@ class LearningModel():
 
     def __call__(self, *params, random_state=None, index_in_batch=None):
         ret = []
+        bounds = [self.p.bounds[k] for k in sorted(self.p.bounds.keys())]
         for i in range(self.p.sample_size):
             for i in range(self.p.max_retries):
                 try:
-                    new_params = [p + random_state.uniform(-self.p.sample_d, self.p.sample_d) for p in params]
+                    new_params = [min(b[1], max(b[0], p + random_state.uniform(-self.p.sample_d, self.p.sample_d))) for p, b in zip(params, bounds)]
                     ret += _sim(*new_params, random_state=random_state, index_in_batch=index_in_batch)
                     break
                 except RuntimeError:
                     if i == self.p.max_retries - 1:
                         logger.critical("LISP code crashed, max tries reached, aborting.")
                         assert False
-                    logger.warning("LISP code crashed at {}, retrying ({}/{})".format(params, i, self.p.max_retries))
+                    logger.warning("LISP code crashed near {}, retrying ({}/{})".format(params, i, self.p.max_retries))
         return ret
 
 
