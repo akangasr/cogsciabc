@@ -21,7 +21,8 @@ class LearningParams():
    def __init__(self,
                 sample_size=10,
                 sample_d=0.05,
-                max_retries=1):
+                max_retries=1,
+                bounds=dict()):
         for k, v in locals().items():
             setattr(self, k, v)
 
