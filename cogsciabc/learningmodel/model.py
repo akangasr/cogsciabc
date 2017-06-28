@@ -244,5 +244,6 @@ def discrepancy_function(*simulated, observed=None):
                         break
                 d = np.abs(osim.mean - oobs.mean) ** 2 + np.abs(osim.std - oobs.std)
                 disc += float(d)
+    disc = np.log(disc)
     return np.array([disc])
 
