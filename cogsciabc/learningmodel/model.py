@@ -97,7 +97,7 @@ def _parse_results(output, result_tag="RESULT_OUT", tag_separator=" ", item_sepa
                 kwargs[features[i]] = items[i]
             ret.append(Observation(**kwargs))
     if len(ret) == 0:
-        logger.warning("Simulation error: {}".format(output))
+        #logger.warning("Simulation error: {}".format(output))
         raise RuntimeError
     return ret
 
@@ -119,7 +119,7 @@ class LearningModel():
                     if i == self.p.max_retries - 1:
                         logger.critical("LISP code crashed, max tries reached, aborting.")
                         assert False
-                    logger.warning("LISP code crashed near {}, retrying ({}/{})".format(params, i, self.p.max_retries))
+                    logger.warning("LISP code crashed near {}, retrying ({}/{})".format(params, i+1, self.p.max_retries))
         return ret
 
 
