@@ -1,7 +1,7 @@
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
-n_replicates = 3
-seed = 10000
+n_replicates = 5
+seed_modulo = 1000000
 methods = ["grid", "uniform", "bo"]
 scales = [5, 7, 10, 12, 14, 16, 18, 20]
 scripts = {
@@ -47,6 +47,7 @@ for script, params in scripts.items():
                 samples = params["samples"][scale]
                 identifier = "{}_{}_{:02d}_{:02d}"\
                         .format(params["id"], method, scale, rep+1)
+                seed = hash(identifier) % seed_modulo
                 cmd = ["{}".format(script_name)]
                 cmd.append(" -t {}".format(time))
                 cmd.append(" -m {}".format(mem))
@@ -55,5 +56,5 @@ for script, params in scripts.items():
                 cmd.append(" -i {}".format(identifier))
                 cmd.append(" -p {} {} {} {} {}".format(seed, method, scale, cores, samples))
                 cmd.append(";")
-                seed += 1
                 print("".join(cmd))
+            print("")
