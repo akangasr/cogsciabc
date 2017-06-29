@@ -21,7 +21,13 @@ from cogsciabc.args import parse_args
 import logging
 logger = logging.getLogger(__name__)
 
-def run_experiment(seed=1):
+def run_experiment(seed, method, scale, cores, samples):
+    logger.info("Running learning model with parameters")
+    logger.info(" * seed = {}".format(seed))
+    logger.info(" * method = {}".format(method))
+    logger.info(" * scale = {}".format(scale))
+    logger.info(" * cores = {}".format(cores))
+    logger.info(" * samples = {}".format(samples))
     p = ModelParams([
         {"name": "RT",
          "distr": "truncnorm",
@@ -31,7 +37,7 @@ def run_experiment(seed=1):
          "std": 1.0,
          "acq_noise": 0.05,
          "kernel_scale": 2.0,
-         "ntics": 20,
+         "ntics": scale,
          },
         {"name": "LF",
          "distr": "truncnorm",
@@ -41,12 +47,18 @@ def run_experiment(seed=1):
          "std": 0.10,
          "acq_noise": 0.001,
          "kernel_scale": 0.05,
-         "ntics": 20,
+         "ntics": scale,
          },
         ])
+    if method == "bo":
+        gp_params_update_interval = cores-1
+        skip_post = False
+    else:
+        gp_params_update_interval = 9999
+        skip_post = True
     training_data = get_dataset()
     model_params = LearningParams(
-               sample_size=2,
+               sample_size=10,
                sample_d=0.01,
                max_retries=10,
                bounds=p.get_bounds(),
@@ -55,18 +67,17 @@ def run_experiment(seed=1):
                 bounds=p.get_bounds(),
                 grid_tics=p.get_grid_tics(),
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.5,
+                noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
                 ARD=True,
-                n_samples=25,
-                n_initial_evidence=5,
-                parallel_batches=5,
-                gp_params_update_interval=10,
+                n_samples=samples,
+                n_initial_evidence=0,
+                parallel_batches=cores-1,
+                gp_params_update_interval=gp_params_update_interval,
                 batch_size=1,
-                sampling_type="bo",
-#                pool=get_sample_pool("/m/home/home2/20/akangasr/unix/cogsciabc/cogsciabc/results2.json"),
-                seed=args["seed"])
+                sampling_type=method,
+                seed=seed)
 
     model = get_model(model_params, p.get_elfi_params(), training_data)
     inference_factory = BolfiFactory(model, bolfi_params)
@@ -74,7 +85,7 @@ def run_experiment(seed=1):
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
-#                  skip_post=True,
+                  skip_post=skip_post,
                   obs_data=training_data,
                   test_data=training_data,
                   plot_data=plot_data)

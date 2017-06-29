@@ -23,7 +23,7 @@ from cogsciabc.args import parse_args
 import logging
 logger = logging.getLogger(__name__)
 
-def run_experiment(seed=1):
+def run_experiment(seed, method, scale, cores, samples):
     p = ModelParams([
         {"name": "focus_duration_100ms",
          "distr": "truncnorm",
@@ -32,7 +32,7 @@ def run_experiment(seed=1):
          "mean": 3.0,
          "std": 1.0,
          "acq_noise": 0.1,
-         "ntics": 10,
+         "ntics": scale,
          },
         {"name": "selection_delay_s",
          #"distr": "constant",
@@ -43,7 +43,7 @@ def run_experiment(seed=1):
          "mean": 0.3,
          "std": 0.3,
          "acq_noise": 0.05,
-         "ntics": 10,
+         "ntics": scale,
          },
         {"name": "menu_recall_probability",
          "distr": "constant",
@@ -54,7 +54,7 @@ def run_experiment(seed=1):
          "mean": 0.69,
          "std": 0.2,
          "acq_noise": 0.05,
-         "ntics": 10,
+         "ntics": scale,
          },
         {"name": "p_obs_adjacent",
          "distr": "constant",
@@ -65,10 +65,15 @@ def run_experiment(seed=1):
          "mean": 0.93,
          "std": 0.2,
          "acq_noise": 0.05,
-         "ntics": 10,
+         "ntics": scale,
          },
         ])
-
+    if method == "bo":
+        gp_params_update_interval = cores-1
+        skip_post = False
+    else:
+        gp_params_update_interval = 9999
+        skip_post = True
     training_data = summary_function(BaillyData(
                 menu_type="Semantic",
                 allowed_users=[],
@@ -82,9 +87,9 @@ def run_experiment(seed=1):
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get())  # all
     rl_params = RLParams(
-                n_training_episodes=20,
-                n_episodes_per_epoch=10,
-                n_simulation_episodes=10,
+                n_training_episodes=10000000,
+                n_episodes_per_epoch=1000,
+                n_simulation_episodes=10000,
                 q_alpha=0.1,
                 q_gamma=0.98,
                 exp_epsilon=0.1,
@@ -105,13 +110,17 @@ def run_experiment(seed=1):
                 bounds=p.get_bounds(),
                 grid_tics=p.get_grid_tics(),
                 acq_noise_cov=p.get_acq_noises(),
-                n_samples=10,
-                n_initial_evidence=10,
-                parallel_batches=5,
-                gp_params_update_interval=5,
+                noise_var=0.1,
+                kernel_var=10.0,
+                kernel_scale=p.get_lengthscales(),
+                ARD=True,
+                n_samples=samples,
+                n_initial_evidence=0,
+                parallel_batches=cores-1,
+                gp_params_update_interval=gp_params_update_interval,
                 batch_size=1,
-                sampling_type="uniform",
-                seed=args["seed"])
+                sampling_type=method,
+                seed=seed)
 
     model = get_model(menu_params, p.get_elfi_params(), rl_params, training_data)
     inference_factory = BolfiFactory(model, bolfi_params)
@@ -119,6 +128,7 @@ def run_experiment(seed=1):
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
+                  skip_post=skip_post,
                   test_data=test_data,
                   obs_data=training_data,
                   plot_data=None)
