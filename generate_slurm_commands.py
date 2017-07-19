@@ -2,9 +2,9 @@
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 n_replicates = 5
 seed_modulo = 1000000
-methods = ["grid", "uniform", "bo"]
-scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
-scales_me = [6, 8, 10, 12, 14, 16, 18, 20]
+methods = ["grid", "lbfgsb", "neldermead", "bo"]
+scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 60, 80, 100]
+scales_me = [6, 8, 10, 12, 14, 16]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
@@ -15,13 +15,13 @@ scripts = {
              12: "0-06:00:00",
              14: "0-12:00:00",
              16: "0-12:00:00",
-             18: "0-20:00:00",
-             20: "0-20:00:00",
-             22: "1-12:00:00",
-             24: "2-00:00:00",
-             26: "2-00:00:00",
-             28: "3-00:00:00",
-             30: "3-00:00:00"},
+             18: "1-00:00:00",
+             20: "1-00:00:00",
+             30: "1-00:00:00",
+             40: "1-00:00:00",
+             60: "1-00:00:00",
+             80: "1-00:00:00",
+             100: "1-00:00:00"},
     "mem": {s: 1500 for s in scales_le},
     "cores": {s: s + 1 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
@@ -37,7 +37,7 @@ scripts = {
              16: "5-00:00:00",
              18: "5-00:00:00",
              20: "5-00:00:00"},
-    "mem": {s: 4000 for s in scales_me},
+    "mem": {s: 12000 for s in scales_me},
     "cores": {s: 2*s + 1 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
@@ -46,6 +46,8 @@ scripts = {
 for script, params in scripts.items():
     for method in methods:
         for scale in params["scales"]:
+            if method == "bo" and scale > 20:
+                continue
             for rep in range(n_replicates):
                 time = params["time"][scale]
                 mem = params["mem"][scale]
