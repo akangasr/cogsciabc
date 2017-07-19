@@ -52,6 +52,10 @@ if __name__ == "__main__":
     np.seterr(all='warn')
     experiment_logs = collect_experiments_from_directory(sys.argv[1], sys.argv[2])
     exp = ExperimentGroup(experiment_logs)
-    exp.print_value_mean_std("Sampling duration", lambda e: e.sampling_duration, formatter=pretty_time)
-    exp.print_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
+    #exp.print_value_mean_std("Sampling duration", lambda e: e.sampling_duration, formatter=pretty_time)
+    #exp.print_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
+    exp.plot_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
+    exp.plot_value_mean_std("ML value", lambda e: np.exp(e.ML_val))
+    exp.plot_value_mean_std("MAP value", lambda e: np.exp(e.MAP_val))
+    exp.plot_value_mean_std("Sampling duration", lambda e: e.sampling_duration)
 
