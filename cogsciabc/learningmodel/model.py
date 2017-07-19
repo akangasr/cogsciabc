@@ -224,13 +224,17 @@ def summary_function(obs):
                     if o.stage == stage and o.height == height and o.response == response:
                         vals.append(o.val)
                 mean = float(np.mean(vals))
-                std = float(np.std(vals))
+                if len(vals) > 1:
+                    std = float(np.std(vals))
+                else:
+                    std = 0.0
                 ret.append(Summary(stage, height, response, mean, std))
     return ret
 
 
 def discrepancy_function(*simulated, observed=None):
-    disc = 0
+    disc = 0.0
+    n = 0.0
     for stage in [1,2,3]:
         for height in [3,4,5]:
             for response in ["encode", "solve", "respond"]:
@@ -242,8 +246,8 @@ def discrepancy_function(*simulated, observed=None):
                     if o.stage == stage and o.height == height and o.response == response:
                         oobs = o
                         break
-                d = np.abs(osim.mean - oobs.mean) ** 2 + np.abs(osim.std - oobs.std)
-                disc += float(d)
-    disc = np.log(disc)
+                disc += np.abs(osim.mean - oobs.mean) ** 2  # RMSE
+                n += 1.0
+    disc = np.sqrt(disc / n)  # RMSE
     return np.array([disc])
 
