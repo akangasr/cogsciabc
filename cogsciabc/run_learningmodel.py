@@ -58,9 +58,9 @@ def run_experiment(seed, method, scale, cores, samples):
         skip_post = True
     training_data = get_dataset()
     model_params = LearningParams(
-               sample_size=10,
-               sample_d=0.01,
-               max_retries=10,
+               sample_size=1,
+               sample_d=0.001,
+               max_retries=20,
                bounds=p.get_bounds(),
                )
     bolfi_params = BolfiParams(
