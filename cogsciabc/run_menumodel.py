@@ -135,7 +135,8 @@ def run_experiment(seed, method, scale, cores, samples):
                   skip_post=skip_post,
                   test_data=test_data,
                   obs_data=training_data,
-                  plot_data=None)
+                  plot_data=None,
+                  n_cores=cores)
     run_and_report(exp, file_path)
 
 

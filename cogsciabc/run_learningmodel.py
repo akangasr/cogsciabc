@@ -67,7 +67,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 bounds=p.get_bounds(),
                 grid_tics=p.get_grid_tics(),
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.1,
+                noise_var=0.25,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
                 ARD=True,
@@ -88,7 +88,8 @@ def run_experiment(seed, method, scale, cores, samples):
                   skip_post=skip_post,
                   obs_data=training_data,
                   test_data=training_data,
-                  plot_data=plot_data)
+                  plot_data=plot_data,
+                  n_cores=cores)
     run_and_report(exp, file_path)
 
 

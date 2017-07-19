@@ -47,15 +47,24 @@ def collect_experiments_from_directory(directory, script):
     return experiment_logs
 
 
+def _get_duration(e):
+    if e.method in ["lbfgsb", "neldermead"]:
+        return e.sampling_duration
+    if e.method in ["grid", "bo"]:
+        return e.sampling_duration * e.n_cores
+
 if __name__ == "__main__":
     print("Starting analysis")
-    np.seterr(all='warn')
     experiment_logs = collect_experiments_from_directory(sys.argv[1], sys.argv[2])
     exp = ExperimentGroup(experiment_logs)
     #exp.print_value_mean_std("Sampling duration", lambda e: e.sampling_duration, formatter=pretty_time)
     #exp.print_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
-    exp.plot_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
-    exp.plot_value_mean_std("ML value", lambda e: np.exp(e.ML_val))
-    exp.plot_value_mean_std("MAP value", lambda e: np.exp(e.MAP_val))
-    exp.plot_value_mean_std("Sampling duration", lambda e: e.sampling_duration)
+    exp.plot_value_mean_std("Minimum discrepancy value", lambda e: e.MD_val)
+    exp.plot_value_mean_std("Prediction error", {"": lambda e: np.mean(e.MD_errs),
+                                                 "ML": lambda e: np.mean(e.ML_errs),
+                                                 "MAP": lambda e: np.mean(e.MAP_errs)})
+    exp.plot_value_mean_std("ML value", lambda e: np.exp(max(-100,e.ML_val)))
+    exp.plot_value_mean_std("MAP value", lambda e: np.exp(max(-100,e.MAP_val)))
+    exp.plot_value_mean_std("Sampling duration", {"": lambda e: _get_duration(e),
+                                                  "ABC": lambda e: _get_duration(e) + e.post_duration})
 

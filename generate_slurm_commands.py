@@ -22,7 +22,7 @@ scripts = {
              60: "1-00:00:00",
              80: "1-00:00:00",
              100: "1-00:00:00"},
-    "mem": {s: 1500 for s in scales_le},
+    "mem": {s: 3000 for s in scales_le},
     "cores": {s: s + 1 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
@@ -52,6 +52,8 @@ for script, params in scripts.items():
                 time = params["time"][scale]
                 mem = params["mem"][scale]
                 cores = params["cores"][scale]
+                if method in ["lbfgsb", "neldermead"]:
+                    cores = 2  # not parallel
                 samples = params["samples"][scale]
                 identifier = "{}_{}_{:02d}_{:02d}"\
                         .format(params["id"], method, scale, rep+1)
