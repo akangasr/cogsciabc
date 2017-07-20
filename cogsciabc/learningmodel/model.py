@@ -19,10 +19,7 @@ logger = logging.getLogger(__name__)
 class LearningParams():
 
    def __init__(self,
-                sample_size=10,
-                sample_d=0.05,
-                max_retries=1,
-                bounds=dict()):
+                max_retries=1):
         for k, v in locals().items():
             setattr(self, k, v)
 
@@ -107,20 +104,16 @@ class LearningModel():
         self.p = params
 
     def __call__(self, *params, random_state=None, index_in_batch=None):
-        ret = []
-        bounds = [self.p.bounds[k] for k in sorted(self.p.bounds.keys())]
-        for i in range(self.p.sample_size):
-            for i in range(self.p.max_retries):
-                try:
-                    new_params = [min(b[1], max(b[0], p + random_state.uniform(-self.p.sample_d, self.p.sample_d))) for p, b in zip(params, bounds)]
-                    ret += _sim(*new_params, random_state=random_state, index_in_batch=index_in_batch)
-                    break
-                except RuntimeError:
-                    if i == self.p.max_retries - 1:
-                        logger.critical("LISP code crashed, max tries reached, aborting.")
-                        assert False
-                    logger.warning("LISP code crashed near {}, retrying ({}/{})".format(params, i+1, self.p.max_retries))
-        return ret
+        par = [float(p) for p in params]
+        print("SIM AT {}".format(par))
+        for j in range(self.p.max_retries):
+            try:
+                return _sim(*par, random_state=random_state, index_in_batch=index_in_batch)
+            except RuntimeError:
+                if j == self.p.max_retries - 1:
+                    logger.critical("LISP code crashed, max tries reached, aborting.")
+                    assert False
+                logger.warning("LISP code crashed at {}, retrying ({}/{})".format(par, j+1, self.p.max_retries))
 
 
 def get_model(p, elfi_p, observation):
@@ -180,7 +173,7 @@ def plot_data(pdf, figsize, data, suptitle):
     pl.close()
 
 
-def get_dataset():
+def get_dataset():   # TODO: training and test sets
     """ Tenison et al. 2016 Fig. 8, estimated """
     ret = [
         Summary(1, 3, "encode", 3.26, 0.5),

@@ -51,18 +51,13 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         ])
     if method == "bo":
-        gp_params_update_interval = cores-1
+        gp_params_update_interval = 3*(cores-1)  # after every third batch
         skip_post = False
     else:
         gp_params_update_interval = 9999
         skip_post = True
     training_data = get_dataset()
-    model_params = LearningParams(
-               sample_size=1,
-               sample_d=0.001,
-               max_retries=20,
-               bounds=p.get_bounds(),
-               )
+    model_params = LearningParams(max_retries=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
                 grid_tics=p.get_grid_tics(),
