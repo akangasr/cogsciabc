@@ -56,11 +56,15 @@ def run_experiment(seed, method, scale, cores, samples):
     else:
         gp_params_update_interval = 9999
         skip_post = True
+    if method == "grid":
+        parallel_batches = samples
+    else:
+        parallel_batches = cores-1
     training_data = get_dataset()
     model_params = LearningParams(max_retries=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
-                grid_tics=p.get_grid_tics(),
+                grid_tics=p.get_grid_tics(seed),
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.25,
                 kernel_var=10.0,
@@ -68,7 +72,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
-                parallel_batches=cores-1,
+                parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
                 batch_size=1,
                 sampling_type=method,
@@ -84,7 +88,9 @@ def run_experiment(seed, method, scale, cores, samples):
                   obs_data=training_data,
                   test_data=training_data,
                   plot_data=plot_data,
-                  n_cores=cores)
+                  n_cores=cores,
+                  replicates=10,
+                  region_size=0.05)
     run_and_report(exp, file_path)
 
 

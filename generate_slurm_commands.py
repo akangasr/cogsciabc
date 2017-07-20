@@ -1,6 +1,6 @@
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
-n_replicates = 5
+n_replicates = 10
 seed_modulo = 1000000
 methods = ["grid", "lbfgsb", "neldermead", "bo"]
 scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 60, 80, 100]
@@ -46,7 +46,7 @@ scripts = {
 for script, params in scripts.items():
     for method in methods:
         for scale in params["scales"]:
-            if method == "bo" and scale > 20:
+            if method != "grid" and scale > 30:
                 continue
             for rep in range(n_replicates):
                 time = params["time"][scale]
