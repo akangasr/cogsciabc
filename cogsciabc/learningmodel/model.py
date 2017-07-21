@@ -180,36 +180,36 @@ def plot_data(pdf, figsize, data, suptitle):
     pl.close()
 
 
-def get_dataset():   # TODO: training and test sets
-    """ Tenison et al. 2016 Fig. 8, estimated """
+def get_dataset():   # TODO: test set?
+    """ Tenison et al. 2016 Fig. 8, personal communication """
     ret = [
-        Summary(1, 3, "encode", 3.26, 0.5),
-        Summary(1, 3, "solve", 1.3, 0.5),
-        Summary(1, 3, "respond", 2.68, 0.5),
-        Summary(1, 4, "encode", 3.26, 0.5),
-        Summary(1, 4, "solve", 3.8, 1.0),
-        Summary(1, 4, "respond", 2.68, 0.5),
-        Summary(1, 5, "encode", 3.26, 0.5),
-        Summary(1, 5, "solve", 6.2, 0.7),
-        Summary(1, 5, "respond", 2.68, 0.5),
-        Summary(2, 3, "encode", 2.44, 0.5),
-        Summary(2, 3, "solve", 0.07, 0.02),
-        Summary(2, 3, "respond", 2.32, 0.5),
-        Summary(2, 4, "encode", 2.44, 0.5),
-        Summary(2, 4, "solve", 0.07, 0.02),
-        Summary(2, 4, "respond", 2.32, 0.5),
-        Summary(2, 5, "encode", 2.44, 0.5),
-        Summary(2, 5, "solve", 0.07, 0.02),
-        Summary(2, 5, "respond", 2.32, 0.5),
-        Summary(3, 3, "encode", 0.54, 0.3),
-        Summary(3, 3, "solve", 0.03, 0.01),
-        Summary(3, 3, "respond", 2.2, 0.2),
-        Summary(3, 4, "encode", 0.54, 0.3),
-        Summary(3, 4, "solve", 0.03, 0.01),
-        Summary(3, 4, "respond", 2.2, 0.2),
-        Summary(3, 5, "encode", 0.54, 0.3),
-        Summary(3, 5, "solve", 0.03, 0.01),
-        Summary(3, 5, "respond", 2.2, 0.2)
+        Summary(1, 3, "encode", 3.0797642498947, 0.304825482333887),
+        Summary(1, 3, "solve", 1.21439129477383, 0.360671175339465),
+        Summary(1, 3, "respond", 2.74175664346458, 0.444174541617887),
+        Summary(1, 4, "encode", 3.41747109018993, 0.358027041765201),
+        Summary(1, 4, "solve", 3.63863364012346, 0.853136786547213),
+        Summary(1, 4, "respond", 2.72455803940943, 0.392265878871146),
+        Summary(1, 5, "encode", 3.27276670381467, 0.3118402309948),
+        Summary(1, 5, "solve", 6.18729894954183, 0.614857110436995),
+        Summary(1, 5, "respond", 2.58668538361632, 0.176501461114284),
+        Summary(2, 3, "encode", 2.26662122373283, 0.321372221955684),
+        Summary(2, 3, "solve", 0.0393282673161665, 0.0513864899250276),
+        Summary(2, 3, "respond", 2.17913628066846, 0.691433060067407),
+        Summary(2, 4, "encode", 2.55794222263096, 0.367054632758945),
+        Summary(2, 4, "solve", 0.0572279421746246, 0.053655457800129),
+        Summary(2, 4, "respond", 2.44439735956446, 0.298568658991272),
+        Summary(2, 5, "encode", 2.50291536061544, 0.562206716261764),
+        Summary(2, 5, "solve", 0.100345240286775, 0.109108762746457),
+        Summary(2, 5, "respond", 2.32417023349651, 0.229329354269061),
+        Summary(3, 3, "encode", 0.576926826579287, 0.421467907940065),
+        Summary(3, 3, "solve", 0.0218644206375898, 0.0394008857357585),
+        Summary(3, 3, "respond", 2.15572485352515, 0.288231471393689),
+        Summary(3, 4, "encode", 0.509769423893816, 0.201090189437526),
+        Summary(3, 4, "solve", 0.038717676624672, 0.0551258810188626),
+        Summary(3, 4, "respond", 2.30936751274668, 0.161490033598321),
+        Summary(3, 5, "encode", 0.530933245232202, 0.246281695856061),
+        Summary(3, 5, "solve", 0.0313563718059507, 0.0232321932556025),
+        Summary(3, 5, "respond", 2.14674922395738, 0.153517228627859)
         ]
     return ret
 
