@@ -105,6 +105,12 @@ class LearningModel():
 
     def __call__(self, *params, random_state=None, index_in_batch=None):
         par = [float(p) for p in params]
+        if par[0] > -2.5 or par[0] < -5.0:
+            print("RF was {}, clipping to allowed area".format(par[0]))
+            par[0] = min(max(-5.0, par[0]), -2.5)
+        if par[1] > 0.1 or par[1] < 0.001:
+            print("LF was {}, clipping to allowed area".format(par[1]))
+            par[1] = min(max(0.001, par[1]), 0.1)
         print("SIM AT {}".format(par))
         for j in range(self.p.max_retries):
             try:
@@ -113,7 +119,8 @@ class LearningModel():
                 if j == self.p.max_retries - 1:
                     logger.critical("LISP code crashed, max tries reached, aborting.")
                     assert False
-                logger.warning("LISP code crashed at {}, retrying ({}/{})".format(par, j+1, self.p.max_retries))
+                par = [float(p) + float(random_state.normal(0, 0.01)) for p in params]
+                logger.warning("LISP code crashed at {}, retrying nearby at {} ({}/{})".format(params, par, j+1, self.p.max_retries))
 
 
 def get_model(p, elfi_p, observation):
