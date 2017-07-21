@@ -3,8 +3,8 @@ script_name = "./elfie/slurm/run_experiment_slurm.sh"
 n_replicates = 10
 seed_modulo = 1000000
 methods = ["grid", "lbfgsb", "neldermead", "bo"]
-scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 60, 80, 100]
-scales_me = [6, 8, 10, 12, 14, 16]
+scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
+scales_me = [6, 8, 10, 12, 14, 16, 18, 20]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
@@ -17,11 +17,10 @@ scripts = {
              16: "0-12:00:00",
              18: "1-00:00:00",
              20: "1-00:00:00",
+             25: "1-00:00:00",
              30: "1-00:00:00",
-             40: "1-00:00:00",
-             60: "1-00:00:00",
-             80: "1-00:00:00",
-             100: "1-00:00:00"},
+             35: "1-00:00:00",
+             40: "1-00:00:00"},
     "mem": {s: 3000 for s in scales_le},
     "cores": {s: s + 1 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
@@ -45,8 +44,10 @@ scripts = {
 
 for script, params in scripts.items():
     for method in methods:
+        if params["id"] == "me" and method not in ["bo", "grid"]:
+            continue
         for scale in params["scales"]:
-            if method != "grid" and scale > 30:
+            if method != "grid" and scale > 25:
                 continue
             for rep in range(n_replicates):
                 time = params["time"][scale]
