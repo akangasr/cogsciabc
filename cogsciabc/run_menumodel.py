@@ -112,7 +112,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 max_number_of_actions_per_session=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
-                grid_tics=p.get_grid_tics(),
+                grid_tics=p.get_grid_tics(seed),
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.1,
                 kernel_var=10.0,
