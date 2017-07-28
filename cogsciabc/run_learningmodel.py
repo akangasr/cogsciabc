@@ -66,7 +66,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 bounds=p.get_bounds(),
                 grid_tics=p.get_grid_tics(seed) if method is "grid" else None,
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.25,
+                noise_var=0.01,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
                 ARD=True,
