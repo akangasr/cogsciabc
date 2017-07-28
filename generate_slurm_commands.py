@@ -1,6 +1,7 @@
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
-n_replicates = 10
+repl_start = 1
+n_replicates = 15
 seed_modulo = 1000000
 methods = ["grid", "lbfgsb", "neldermead", "bo"]
 scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
@@ -21,8 +22,8 @@ scripts = {
              30: "1-00:00:00",
              35: "1-00:00:00",
              40: "1-00:00:00"},
-    "mem": {s: 3000 for s in scales_le},
-    "cores": {s: s + 1 for s in scales_le},
+    "mem": {s: 4000 for s in scales_le},
+    "cores": {s: 11 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
 "cogsciabc/cogsciabc/run_menumodel.py": {
@@ -37,7 +38,7 @@ scripts = {
              18: "5-00:00:00",
              20: "5-00:00:00"},
     "mem": {s: 12000 for s in scales_me},
-    "cores": {s: 2*s + 1 for s in scales_me},
+    "cores": {s: 21 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
 }
@@ -49,7 +50,7 @@ for script, params in scripts.items():
         for scale in params["scales"]:
             if method != "grid" and scale > 25:
                 continue
-            for rep in range(n_replicates):
+            for rep in range(repl_start-1, n_replicates):
                 time = params["time"][scale]
                 mem = params["mem"][scale]
                 cores = params["cores"][scale]
