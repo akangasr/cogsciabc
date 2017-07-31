@@ -190,9 +190,9 @@ class SearchEnvironment(ParametricLoggingEnvironment):
             n_training_menus=10000):
         """ Initializes the search environment
         """
+        super(SearchEnvironment, self).__init__()
         self.v = None # set with setup
         self.random_state = None # set with setup
-        self.log = None # set by RL_model
         self.task = None # set by Task
 
         self.menu_type = menu_type
@@ -223,6 +223,9 @@ class SearchEnvironment(ParametricLoggingEnvironment):
         self.indim = 1
         self.discreteActions = True
         self.numActions = self.n_items + 2 # look + click + quit
+
+    def clean(self):
+        self.training_menus = list()
 
     def to_dict(self):
         return {

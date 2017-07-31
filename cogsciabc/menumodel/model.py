@@ -75,7 +75,8 @@ def get_model(p, elfi_p, rl_p, observation):
                 rl_params=rl_p,
                 parameter_names=[p.name for p in elfi_p],
                 env=env,
-                task=task)
+                task=task,
+                clean_after_call=True)
     model = elfi_p[0].model
     simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                *elfi_p,
@@ -106,7 +107,7 @@ def discrepancy_function(*simulated, observed=None):
             + np.abs(tct_std_pre_obs - tct_std_pre_sim) \
             + np.abs(tct_mean_abs_obs - tct_mean_abs_sim) ** 2 \
             + np.abs(tct_std_abs_obs - tct_std_abs_sim)
-    disc = float(disc / 1000000.0)  # scaling
+    disc = np.log(disc)
     return np.array([disc])
 
 

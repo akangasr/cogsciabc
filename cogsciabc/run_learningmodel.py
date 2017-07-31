@@ -64,7 +64,7 @@ def run_experiment(seed, method, scale, cores, samples):
     model_params = LearningParams(max_retries=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
-                grid_tics=p.get_grid_tics(seed),
+                grid_tics=p.get_grid_tics(seed) if method is "grid" else None,
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.25,
                 kernel_var=10.0,
