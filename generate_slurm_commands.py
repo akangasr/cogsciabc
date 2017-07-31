@@ -1,11 +1,12 @@
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 15
+n_replicates = 3
 seed_modulo = 1000000
-methods = ["grid", "lbfgsb", "neldermead", "bo"]
+#methods = ["grid", "lbfgsb", "neldermead", "bo"]
+methods = ["grid", "neldermead", "bo"]
 scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
-scales_me = [6, 8, 10, 12, 14, 16, 18, 20]
+scales_me = [8, 14, 20]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
@@ -37,7 +38,7 @@ scripts = {
              16: "5-00:00:00",
              18: "5-00:00:00",
              20: "5-00:00:00"},
-    "mem": {s: 12000 for s in scales_me},
+    "mem": {s: 8000 for s in scales_me},
     "cores": {s: 21 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
