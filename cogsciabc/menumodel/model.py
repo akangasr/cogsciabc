@@ -73,7 +73,7 @@ def get_model(p, elfi_p, rl_p, observation):
                 max_number_of_actions_per_session=p.max_number_of_actions_per_session)
     rl = RLModel(
                 rl_params=rl_p,
-                parameter_names=[p.name for p in elfi_p],
+                parameter_names=[p.name[4:] for p in elfi_p],
                 env=env,
                 task=task,
                 clean_after_call=True)
