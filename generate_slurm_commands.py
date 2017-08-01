@@ -1,29 +1,33 @@
+import hashlib
+
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 3
+n_replicates = 15
 seed_modulo = 1000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
-scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
+scales_le = [10, 15, 20, 25, 30, 35, 40]
+scales_ch = [10, 20, 30, 40, 50, 60]
 scales_me = [6, 8, 10, 12, 14]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
     "scales": scales_le,
-    "time": {6:  "0-04:00:00",
-             8:  "0-04:00:00",
-             10: "0-06:00:00",
-             12: "0-06:00:00",
-             14: "0-12:00:00",
-             16: "0-12:00:00",
-             18: "1-00:00:00",
+    "time": {10: "0-06:00:00",
+             15: "0-12:00:00",
              20: "1-00:00:00",
              25: "1-00:00:00",
-             30: "1-00:00:00",
-             35: "1-00:00:00",
-             40: "1-00:00:00"},
-    "mem": {s: 4000 for s in scales_le},
+             30: "1-12:00:00",
+             35: "2-00:00:00",
+             40: "2-00:00:00"},
+    "mem": {10: 2000,
+            15: 3000,
+            20: 4000,
+            25: 4000,
+            30: 5000,
+            35: 5000,
+            40: 6000},
     "cores": {s: 11 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
@@ -50,7 +54,7 @@ for script, params in scripts.items():
         if params["id"] == "me" and method not in ["bo", "grid"]:
             continue
         for scale in params["scales"]:
-            if method != "grid" and scale > 25:
+            if params["id"] == "le" and method == "bo" and scale > 30:
                 continue
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][scale]
@@ -61,7 +65,8 @@ for script, params in scripts.items():
                 samples = params["samples"][scale]
                 identifier = "{}_{}_{:02d}_{:02d}"\
                         .format(params["id"], method, scale, rep+1)
-                seed = hash(identifier) % seed_modulo
+                hsh = hashlib.sha224(bytearray(identifier, 'utf-8')).digest()
+                seed = int.from_bytes(hsh, byteorder='big') % seed_modulo
                 cmd = ["{}".format(script_name)]
                 cmd.append(" -t {}".format(time))
                 cmd.append(" -m {}".format(mem))
