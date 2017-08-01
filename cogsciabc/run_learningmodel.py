@@ -37,6 +37,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "std": 1.0,
          "acq_noise": 0.05,
          "kernel_scale": 2.0,
+         "L": 3.0,
          "ntics": scale,
          },
         {"name": "LF",
@@ -47,6 +48,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "std": 0.10,
          "acq_noise": 0.001,
          "kernel_scale": 0.05,
+         "L": 30.0,
          "ntics": scale,
          },
         ])
@@ -69,6 +71,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 noise_var=0.01,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
+                L=p.get_L(),
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
