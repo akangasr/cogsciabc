@@ -6,7 +6,7 @@ seed_modulo = 1000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
 scales_le = [6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
-scales_me = [8, 14, 20]
+scales_me = [6, 8, 10, 12, 14]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
@@ -30,15 +30,16 @@ scripts = {
 "cogsciabc/cogsciabc/run_menumodel.py": {
     "id": "me",
     "scales": scales_me,
-    "time": {6:  "5-00:00:00",
-             8:  "5-00:00:00",
-             10: "5-00:00:00",
-             12: "5-00:00:00",
-             14: "5-00:00:00",
-             16: "5-00:00:00",
-             18: "5-00:00:00",
-             20: "5-00:00:00"},
-    "mem": {s: 4000 for s in scales_me},
+    "time": {6:  "1-00:00:00",
+             8:  "1-12:00:00",
+             10: "2-00:00:00",
+             12: "3-00:00:00",
+             14: "4-00:00:00"},
+    "mem": {6:  6000,
+            8:  6000,
+            10: 6000,
+            12: 6000,
+            14: 6000},
     "cores": {s: 21 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
