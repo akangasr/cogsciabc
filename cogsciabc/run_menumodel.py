@@ -93,7 +93,7 @@ def run_experiment(seed, method, scale, cores, samples):
     rl_params = RLParams(
                 n_training_episodes=10000000,
                 n_episodes_per_epoch=1000,
-                n_simulation_episodes=10000,
+                n_simulation_episodes=1000,
                 q_alpha=0.1,
                 q_gamma=0.98,
                 exp_epsilon=0.1,

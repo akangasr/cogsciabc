@@ -59,10 +59,19 @@ if __name__ == "__main__":
     exp = ExperimentGroup(experiment_logs)
     #exp.print_value_mean_std("Sampling duration", lambda e: e.sampling_duration, formatter=pretty_time)
     #exp.print_value_mean_std("Minimum discrepancy value", lambda e: np.exp(e.MD_val))
-    exp.plot_value_mean_std("Minimum discrepancy value", lambda e: e.MD_val)
+    exp.plot_value_mean_std("Minimum discrepancy value per samples", lambda e: e.MD_val)
+    exp.plot_value_mean_std("Minimum discrepancy value per duration",
+                            lambda e: e.MD_val,
+                            x_getters={"": lambda e: _get_duration(e),
+                                       "ABC": lambda e: _get_duration(e) + e.post_duration})
     exp.plot_value_mean_std("Prediction error", {"": lambda e: np.mean(e.MD_errs),
                                                  "ML": lambda e: np.mean(e.ML_errs),
                                                  "MAP": lambda e: np.mean(e.MAP_errs)})
+    exp.plot_value_mean_std("Prediction error", {"": lambda e: np.mean(e.MD_errs),
+                                                 "ML": lambda e: np.mean(e.ML_errs),
+                                                 "MAP": lambda e: np.mean(e.MAP_errs)},
+                            x_getters={"": lambda e: _get_duration(e),
+                                       "ABC": lambda e: _get_duration(e) + e.post_duration})
     exp.plot_value_mean_std("ML value", lambda e: np.exp(max(-100,e.ML_val)))
     exp.plot_value_mean_std("MAP value", lambda e: np.exp(max(-100,e.MAP_val)))
     exp.plot_value_mean_std("Sampling duration", {"": lambda e: _get_duration(e),

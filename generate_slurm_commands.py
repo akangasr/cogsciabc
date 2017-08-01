@@ -38,7 +38,7 @@ scripts = {
              16: "5-00:00:00",
              18: "5-00:00:00",
              20: "5-00:00:00"},
-    "mem": {s: 8000 for s in scales_me},
+    "mem": {s: 4000 for s in scales_me},
     "cores": {s: 21 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
