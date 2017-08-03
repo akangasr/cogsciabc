@@ -4,30 +4,32 @@ import hashlib
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
 n_replicates = 15
-seed_modulo = 1000000
+seed_modulo = 10000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
-scales_le = [10, 15, 20, 25, 30, 35, 40]
+scales_le = [10, 15, 20, 25, 30, 35, 40, 45]
 scales_ch = [10, 20, 30, 40, 50, 60]
 scales_me = [6, 8, 10, 12, 14]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
     "scales": scales_le,
-    "time": {10: "0-04:00:00",
-             15: "0-04:00:00",
-             20: "0-04:00:00",
-             25: "0-04:00:00",
-             30: "0-04:00:00",
-             35: "0-04:00:00",
-             40: "0-04:00:00"},
+    "time": {10: "0-00:30:00",
+             15: "0-01:00:00",
+             20: "0-01:30:00",
+             25: "0-02:00:00",
+             30: "0-02:30:00",
+             35: "0-03:00:00",
+             40: "0-03:00:00",
+             45: "0-05:00:00"},
     "mem": {10: 1000,
             15: 1000,
             20: 1000,
-            25: 1000,
-            30: 2000,
-            35: 2000,
-            40: 3000},
+            25: 2000,
+            30: 3000,
+            35: 4000,
+            40: 5000,
+            45: 6000},
     "cores": {s: 11 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
@@ -59,7 +61,7 @@ for script, params in scripts.items():
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][scale]
                 if method == "neldermead":
-                    time = "5-00:00:00"
+                    time = "1-12:00:00"
                 mem = params["mem"][scale]
                 cores = params["cores"][scale]
                 if method in ["lbfgsb", "neldermead"]:
