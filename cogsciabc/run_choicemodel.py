@@ -94,6 +94,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
+                abc_threshold_delta=0.01,
                 batch_size=1,
                 sampling_type=method,
                 seed=seed)
