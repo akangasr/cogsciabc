@@ -58,15 +58,17 @@ def run_experiment(seed, method, scale, cores, samples):
     else:
         gp_params_update_interval = 9999
         skip_post = True
+    grid_tics = None
     if method == "grid":
         parallel_batches = samples
+        grid_tics = p.get_grid_tics(seed)
     else:
         parallel_batches = cores-1
     training_data = get_dataset()
     model_params = LearningParams(max_retries=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
-                grid_tics=p.get_grid_tics(seed) if method is "grid" else None,
+                grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.01,
                 kernel_var=10.0,

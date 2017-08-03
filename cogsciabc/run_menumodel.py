@@ -33,6 +33,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "std": 1.0,
          "acq_noise": 0.1,
          "kernel_scale": 1.0,
+         "L": 10.0,
          "ntics": scale,
          },
         {"name": "selection_delay_s",
@@ -45,6 +46,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "std": 0.3,
          "acq_noise": 0.05,
          "kernel_scale": 0.2,
+         "L": 10.0,
          "ntics": scale,
          },
         {"name": "menu_recall_probability",
@@ -78,6 +80,12 @@ def run_experiment(seed, method, scale, cores, samples):
     else:
         gp_params_update_interval = 9999
         skip_post = True
+    grid_tics = None
+    if method == "grid":
+        parallel_batches = samples
+        grid_tics = p.get_grid_tics(seed)
+    else:
+        parallel_batches = cores-1
     training_data = summary_function(BaillyData(
                 menu_type="Semantic",
                 allowed_users=[],
@@ -112,15 +120,16 @@ def run_experiment(seed, method, scale, cores, samples):
                 max_number_of_actions_per_session=20)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
-                grid_tics=p.get_grid_tics(seed),
+                grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
+                L=p.get_L(),
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
-                parallel_batches=cores-1,
+                parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
                 batch_size=1,
                 sampling_type=method,

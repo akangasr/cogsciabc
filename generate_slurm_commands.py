@@ -14,36 +14,36 @@ scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
     "scales": scales_le,
-    "time": {10: "0-06:00:00",
-             15: "0-12:00:00",
-             20: "1-00:00:00",
-             25: "1-00:00:00",
-             30: "1-12:00:00",
-             35: "2-00:00:00",
-             40: "2-00:00:00"},
-    "mem": {10: 2000,
-            15: 3000,
-            20: 4000,
-            25: 4000,
-            30: 5000,
-            35: 5000,
-            40: 6000},
+    "time": {10: "0-04:00:00",
+             15: "0-04:00:00",
+             20: "0-04:00:00",
+             25: "0-04:00:00",
+             30: "0-04:00:00",
+             35: "0-04:00:00",
+             40: "0-04:00:00"},
+    "mem": {10: 1000,
+            15: 1000,
+            20: 1000,
+            25: 1000,
+            30: 2000,
+            35: 2000,
+            40: 3000},
     "cores": {s: 11 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
 "cogsciabc/cogsciabc/run_menumodel.py": {
     "id": "me",
     "scales": scales_me,
-    "time": {6:  "1-00:00:00",
-             8:  "1-12:00:00",
+    "time": {6:  "1-12:00:00",
+             8:  "2-00:00:00",
              10: "2-00:00:00",
              12: "3-00:00:00",
-             14: "4-00:00:00"},
-    "mem": {6:  6000,
-            8:  6000,
-            10: 6000,
-            12: 6000,
-            14: 6000},
+             14: "3-00:00:00"},
+    "mem": {6:  5000,
+            8:  5000,
+            10: 5000,
+            12: 5000,
+            14: 5000},
     "cores": {s: 21 for s in scales_me},
     "samples": {s: s*s for s in scales_me},
     },
@@ -54,10 +54,12 @@ for script, params in scripts.items():
         if params["id"] == "me" and method not in ["bo", "grid"]:
             continue
         for scale in params["scales"]:
-            if params["id"] == "le" and method == "bo" and scale > 30:
+            if params["id"] == "le" and method == "bo" and scale > 35:
                 continue
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][scale]
+                if method == "neldermead":
+                    time = "5-00:00:00"
                 mem = params["mem"][scale]
                 cores = params["cores"][scale]
                 if method in ["lbfgsb", "neldermead"]:
