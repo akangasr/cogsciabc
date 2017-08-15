@@ -9,7 +9,7 @@ seed_modulo = 10000000
 methods = ["grid", "neldermead", "bo"]
 scales_le = [10, 15, 20, 25, 30, 35, 40, 45]
 scales_ch = [10, 20, 30, 40, 50, 60]
-scales_me = [6, 8, 10, 12, 14]
+scales_me = [4, 6, 8, 10, 12, 14]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
@@ -29,19 +29,21 @@ scripts = {
             30: 3000,
             35: 4000,
             40: 5000,
-            45: 6000},
+            45: 8000},
     "cores": {s: 11 for s in scales_le},
     "samples": {s: s*s for s in scales_le},
     },
 "cogsciabc/cogsciabc/run_menumodel.py": {
     "id": "me",
     "scales": scales_me,
-    "time": {6:  "1-12:00:00",
+    "time": {4:  "1-00:00:00",
+             6:  "1-12:00:00",
              8:  "2-00:00:00",
              10: "2-00:00:00",
              12: "3-00:00:00",
              14: "3-00:00:00"},
-    "mem": {6:  5000,
+    "mem": {4:  5000,
+            6:  5000,
             8:  5000,
             10: 5000,
             12: 5000,
