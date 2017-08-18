@@ -107,7 +107,7 @@
 
 
   (gen-facts)
-  (sdp :base-level 2)
+  (sdp :base-level *blc*)
 
 
   (mapcar #'(lambda (x) (mapcar #'(lambda (y) (addition-base-level x y))

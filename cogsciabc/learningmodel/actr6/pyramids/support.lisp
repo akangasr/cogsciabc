@@ -215,6 +215,8 @@
 (defvar *log* nil)
 (defvar *rt* -2.6)
 (defvar *lf* 0.1)
+(defvar *blc* 0.0)
+(defvar *ans* nil)
 (defvar *out* t)
 
 ;; A helper for returning from the *log* only relevant entries.
@@ -227,11 +229,14 @@
     (/ (apply #'+ all) (length all))))
 
 (defun run-problems (problems)
-  (format t "Running pyramids with rt = ~a and lf = ~a ~%" (first ext:*args*) (second ext:*args*))
+  (format t "Running pyramids with rt = ~a, lf = ~a, blc = ~a, and = ~a ~%"
+          (first ext:*args*) (second ext:*args*) (third ext:*args*) (fourth ext:*args*))
   (setf *rt* (read-from-string (first ext:*args*)))
   (setf *lf* (read-from-string (second ext:*args*)))
   (when (third ext:*args*)
-    (setf *out* (open (third ext:*args*) :direction :output :if-exists :supersede)))
+    (setf *blc* (read-from-string (third ext:*args*))))
+  (when (fourth ext:*args*)
+    (setf *ans* (read-from-string (fourth ext:*args*))))
   (mapcar #'(lambda (x) (run-problem-state1 x t) (module-engagement t)) problems)
   (mapcar #'(lambda (x) (run-problem-state2 x t) (module-engagement t)) problems)
   (mapcar #'(lambda (x) (run-problem-state3 x t)(module-engagement t)) problems)
@@ -253,6 +258,9 @@
     (reset)
     (eval `(sgp :rt ,*rt*))
     (eval `(sgp :lf ,*lf*))
+    (eval `(sgp :blc ,*blc*))
+    (eval `(sgp :ans ,*ans*))
+
     (eval `(sgp :v ,flag))
     ;; JJ: new params set.    
     (let* ((window (open-exp-window "Pyramid Experiment" :visible nil))

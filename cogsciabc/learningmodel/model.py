@@ -68,7 +68,7 @@ def _sim(*params, random_state=None, index_in_batch=None):
 
 
 def _create_command(*params, actr_dir="actr6"):
-    command_template = "cd {0}; clisp pyramids.lisp {1} {2}"
+    command_template = "cd {0}; clisp pyramids.lisp {1} {2} {3} {4}"
     source_dir = os.path.dirname(os.path.abspath(__file__))
     model_dir = os.path.join(source_dir, actr_dir)
     return command_template.format(model_dir, *params)
