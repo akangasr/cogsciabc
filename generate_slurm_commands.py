@@ -70,7 +70,7 @@ for script, params in scripts.items():
                     cores = 2  # not parallel
                 samples = params["samples"][scale]
                 identifier = "{}_{}_{:02d}_{:02d}"\
-                        .format(params["id"], method, scale, rep+1)
+                        .format(params["id"], method, samples, rep+1)
                 hsh = hashlib.sha224(bytearray(identifier, 'utf-8')).digest()
                 seed = int.from_bytes(hsh, byteorder='big') % seed_modulo
                 cmd = ["{}".format(script_name)]

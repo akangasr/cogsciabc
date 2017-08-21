@@ -22,16 +22,15 @@ def collect_experiments_from_directory(directory, script):
     for subdir in subdirs:
         if subdir == directory:
             continue
-        m = re.match(r"{}/([A-Za-z]+)_([A-Za-z]+)_(\d+)_(\d+)".format(directory), subdir)
+        m = re.match(r"{}/([A-Za-z0-9]+)_([A-Za-z0-9]+)_(\d+)_(\d+)".format(directory), subdir)
         if m is None:
-            print("{} .. skip".format(subdir))
+            print("{} .. skip (unknown)".format(subdir))
         else:
-            script_id, method, scale, n = m.groups()
+            script_id, method, samples, n = m.groups()
             if script_id != script:
-                print("{} .. skip".format(subdir))
+                print("{} .. skip ({})".format(subdir, script_id))
                 continue
-            scale = int(scale)
-            samples = scale*scale
+            samples = int(samples)
             path = os.path.join(subdir, "results.json")
             if not os.path.exists(path):
                 print("{} .. no results".format(path))
