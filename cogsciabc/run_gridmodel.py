@@ -111,7 +111,7 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
                 sampling_type="bo",
                 seed=seed)
 
-    path_max_len = 15
+    path_max_len = 12
     if n_features == 2:
         ground_truth_v = [-0.33, -0.67]
         ground_truth = {"feature1_value": -0.33, "feature2_value": -0.67}

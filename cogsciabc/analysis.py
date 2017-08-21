@@ -24,23 +24,23 @@ def collect_experiments_from_directory(directory, script):
             continue
         m = re.match(r"{}/([A-Za-z0-9]+)_([A-Za-z0-9]+)_(\d+)_(\d+)".format(directory), subdir)
         if m is None:
-            print("{} .. skip (unknown)".format(subdir))
+            print("skip (unknown) .. {}".format(subdir))
         else:
             script_id, method, samples, n = m.groups()
             if script_id != script:
-                print("{} .. skip ({})".format(subdir, script_id))
+                print("skip ({}) .. {}".format(subdir, script_id))
                 continue
             samples = int(samples)
             path = os.path.join(subdir, "results.json")
             if not os.path.exists(path):
-                print("{} .. no results".format(path))
+                print("no results .. {}".format(path))
                 continue
             try:
                 exp = ExperimentLog(path, method, samples)
                 experiment_logs.append(exp)
-                print("{} .. ok".format(path))
+                print("ok .. {}".format(path))
             except Exception as e:
-                print("{} .. error".format(path))
+                print("error .. {}".format(path))
                 print(e)
     print("")
     return experiment_logs
@@ -64,9 +64,11 @@ if __name__ == "__main__":
                             x_getters={"": lambda e: _get_duration(e)/3600.0,
                                        "ABC": lambda e: (_get_duration(e) + e.post_duration)/3600.0})
     exp.plot_value_mean_std("Prediction error", {"": lambda e: np.mean(e.MD_errs),
+                                                 "MED": lambda e: np.mean(e.MED_errs),
                                                  "ML": lambda e: np.mean(e.ML_errs),
                                                  "MAP": lambda e: np.mean(e.MAP_errs)})
     exp.plot_value_mean_std("Prediction error", {"": lambda e: np.mean(e.MD_errs),
+                                                 "MED": lambda e: np.mean(e.MED_errs),
                                                  "ML": lambda e: np.mean(e.ML_errs),
                                                  "MAP": lambda e: np.mean(e.MAP_errs)},
                             x_getters={"": lambda e: _get_duration(e)/3600.0,
