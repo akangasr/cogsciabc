@@ -144,8 +144,10 @@ def get_dataset(p, elfi_p, rl_p, param_values, seed, max_sim_path_len=1e10):
                 parameter_names=[p.name[4:] for p in elfi_p],
                 env=env,
                 task=task,
-                clean_after_call=True)
+                clean_after_call=False)
     data = rl(*param_values, random_state=np.random.RandomState(seed))
+    policy = rl.get_policy()
+    rl.env.print_policy(policy)
     summary = filt_summary(max_sim_path_len, data)
     logger.info("Dataset generated")
     print(summary)
@@ -184,7 +186,7 @@ def get_model(exact, p, elfi_p, rl_p, observation, path_max_len):
                 parameter_names=[p.name[4:] for p in elfi_p],
                 env=env,
                 task=task,
-                clean_after_call=True)
+                clean_after_call=False)
     if exact is True:
         simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
                                    *elfi_p,
@@ -211,6 +213,12 @@ def get_model(exact, p, elfi_p, rl_p, observation, path_max_len):
                                        name="discrepancy")
     return elfi.get_current_model()
 
+
+def simulator(rl, *parameters, index_in_batch=0, random_state=None):
+    ret = rl(*parameters, random_state=random_state)
+    policy = rl.get_policy()
+    rl.env.print_policy(policy)
+    return ret
 
 def filt_summary(path_max_len, observations):
     obs = summary_function(observations)
@@ -257,6 +265,7 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
     rl.train_model(parameters, random_state=random_state)
     precomp_obs_logprobs = dict()
     policy = rl.get_policy()
+    rl.env.print_policy(policy)
     logger.info("Evaluating loglikelihood of {} observations".format(len(observations)))
     start_time1 = time.time()
     for obs_i in observations:

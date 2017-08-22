@@ -95,13 +95,14 @@ def run_experiment(seed, method, scale, cores, samples):
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get())  # all
     rl_params = RLParams(
-                n_training_episodes=10000000,
-                n_episodes_per_epoch=1000,
+                n_training_episodes=1000000,
+                n_episodes_per_epoch=50000,
                 n_simulation_episodes=1000,
-                q_alpha=0.1,
+                q_alpha=1.0,
+                q_w=1.0,
                 q_gamma=0.98,
-                exp_epsilon=0.1,
-                exp_decay=1.0)
+                exp_epsilon=1.0,
+                exp_decay=0.999999)
     menu_params = MenuParams(
                 menu_type="semantic",
                 menu_groups=2,
@@ -143,7 +144,7 @@ def run_experiment(seed, method, scale, cores, samples):
                   plot_data=None,
                   types=types,
                   n_cores=cores,
-                  replicates=10,
+                  replicates=20,
                   region_size=0.02)
     run_and_report(exp, file_path)
 
