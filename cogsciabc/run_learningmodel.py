@@ -33,57 +33,45 @@ def run_experiment(seed, method, scale, cores, samples):
          "distr": "uniform",
          "minv": -5.0,
          "maxv": -2.5,
-         "mean": -3.5,
-         "std": 1.0,
-         "acq_noise": 0.05,
-         "kernel_scale": 1.0,
-         "L": 3.0,
+         "acq_noise": 0.0,
+         "kernel_scale": 0.5,  # 20% of range
+         "L": 2.0,  # 5 units / range
          "ntics": scale,
          },
         {"name": "LF",
          "distr": "uniform",
          "minv": 0.001,
          "maxv": 0.10,
-         "mean": 0.05,
-         "std": 0.10,
-         "acq_noise": 0.001,
-         "kernel_scale": 0.05,
-         "L": 30.0,
+         "acq_noise": 0.0,
+         "kernel_scale": 0.02,  # 20% of range
+         "L": 50.0,  # 5 units / range
          "ntics": scale,
          },
         {"name": "BLC",
          "distr": "uniform",
-         #"distr": "constant",
-         #"val": 0.0,
          "minv": 0.0,
          "maxv": 20.0,
-         "mean": 0.0,
-         "std": 20.0,
-         "acq_noise": 0.01,
-         "kernel_scale": 2.0,
-         "L": 0.5,
+         "acq_noise": 0.0,
+         "kernel_scale": 4.0,  # 20% of range
+         "L": 0.25,  # 5 units / range
          "ntics": scale,
          },
         {"name": "ANS",
          "distr": "uniform",
-         #"distr": "constant",
-         #"val": 0.2,
          "minv": 0.001,
-         "maxv": 0.2,
-         "mean": 0.1,
-         "std": 1.0,
-         "acq_noise": 0.01,
-         "kernel_scale": 0.05,
-         "L": 30.0,
+         "maxv": 0.10,
+         "acq_noise": 0.0,
+         "kernel_scale": 0.02,  # 20% of range
+         "L": 50.0,  # 5 units / range
          "ntics": scale,
          }
         ])
     if method == "bo":
         gp_params_update_interval = 3*(cores-1)  # after every third batch
-        skip_post = False
+        types = ["MED", "ML"]  # uniform prior
     else:
         gp_params_update_interval = 9999
-        skip_post = True
+        types = ["MD"]
     grid_tics = None
     if method == "grid":
         parallel_batches = samples
@@ -96,8 +84,8 @@ def run_experiment(seed, method, scale, cores, samples):
                 bounds=p.get_bounds(),
                 grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.1,
-                kernel_var=10.0,
+                noise_var=0.005,  # based on intial tests
+                kernel_var=5.0,  # based on initial tests
                 kernel_scale=p.get_lengthscales(),
                 L=p.get_L(),
                 ARD=True,
@@ -116,10 +104,10 @@ def run_experiment(seed, method, scale, cores, samples):
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
-                  skip_post=skip_post,
                   obs_data=training_data,
                   test_data=training_data,
                   plot_data=plot_data,
+                  types=types,
                   n_cores=cores,
                   replicates=20,
                   region_size=0.02)

@@ -30,8 +30,8 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
-             "L": 10.0,
+             "kernel_scale": 0.2,
+             "L": 5.0,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -39,8 +39,8 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
-             "L": 10.0,
+             "kernel_scale": 0.2,
+             "L": 5.0,
              "ntics": 0,
              },
             ])
@@ -51,8 +51,8 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
-             "L": 10.0,
+             "kernel_scale": 0.2,
+             "L": 5.0,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -60,8 +60,8 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
-             "L": 10.0,
+             "kernel_scale": 0.2,
+             "L": 5.0,
              "ntics": 0,
              },
             {"name": "feature3_value",
@@ -69,8 +69,8 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
-             "L": 10.0,
+             "kernel_scale": 0.2,
+             "L": 5.0,
              "ntics": 0,
              },
             ])
@@ -79,7 +79,7 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
     parallel_batches = cores-1
     rl_params = RLParams(
                 n_training_episodes=200000,
-                n_episodes_per_epoch=1000,
+                n_episodes_per_epoch=100,
                 n_simulation_episodes=1000,
                 q_alpha=0.1,
                 q_gamma=0.98,
@@ -124,17 +124,18 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
         test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
 
     if exact is True:
+        types = ["ML"]
         # hack
         from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase
         def modified_experiment(grid_params, elfi_params, rl_params, bolfi_params,
-                                obs_data, test_data, plot_data, replicates, region_size,
+                                obs_data, test_data, plot_data, types, replicates, region_size,
                                 ground_truth, n_cores, path_max_len, pdf, figsize):
             elfi.new_model()
             model = get_model(True, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
             inference_task = BolfiFactory(model, bolfi_params).get()
 
             ret = SamplingPhase(n_cores=n_cores).run(inference_task, dict())
-            ret = PosteriorAnalysisPhase(skip=False).run(inference_task, ret)
+            ret = PosteriorAnalysisPhase(types=types).run(inference_task, ret)
             ret["plots_logl"] = inference_task.plot_post(pdf, figsize)
 
             elfi.new_model()
@@ -154,20 +155,22 @@ def run_experiment(seed, exact, grid_size, n_features, cores, samples):
                       obs_data=training_data,
                       test_data=test_data,
                       plot_data=None,
+                      types=types,
                       replicates=2,
                       region_size=0.01,
                       ground_truth=ground_truth,
                       n_cores=cores,
                       path_max_len=path_max_len)
     else:
+        types = ["MED"]
         model = get_model(False, grid_params, elfi_params, rl_params, training_data, path_max_len)
         inference_factory = BolfiFactory(model, bolfi_params)
         exp = partial(inference_experiment,
                       inference_factory,
-                      skip_post=False,
                       test_data=test_data,
                       obs_data=training_data,
                       plot_data=None,
+                      types=types,
                       ground_truth=ground_truth,
                       n_cores=cores,
                       replicates=2,

@@ -28,58 +28,54 @@ def run_experiment(seed, method, scale, cores, samples):
         {"name": "focus_duration_100ms",
          "distr": "truncnorm",
          "minv": 0.0,
-         "maxv": 6.0,
+         "maxv": 5.0,
          "mean": 3.0,
          "std": 1.0,
-         "acq_noise": 0.1,
+         "acq_noise": 0.0,
          "kernel_scale": 1.0,
-         "L": 10.0,
+         "L": 2.0,
          "ntics": scale,
          },
         {"name": "selection_delay_s",
-         #"distr": "constant",
-         "val": 0.3,
          "distr": "truncnorm",
          "minv": 0.0,
          "maxv": 1.0,
          "mean": 0.3,
          "std": 0.3,
-         "acq_noise": 0.05,
+         "acq_noise": 0.0,
          "kernel_scale": 0.2,
          "L": 10.0,
          "ntics": scale,
          },
         {"name": "menu_recall_probability",
-         #"distr": "constant",
-         #"val": 0.69,
          "distr": "truncnorm",
          "minv": 0.0,
          "maxv": 1.0,
          "mean": 0.69,
          "std": 0.2,
-         "acq_noise": 0.05,
+         "acq_noise": 0.0,
          "kernel_scale": 0.2,
+         "L": 10.0,
          "ntics": scale,
          },
         {"name": "p_obs_adjacent",
-         #"distr": "constant",
-         #"val": 0.93,
          "distr": "truncnorm",
          "minv": 0.0,
          "maxv": 1.0,
          "mean": 0.93,
          "std": 0.2,
-         "acq_noise": 0.05,
+         "acq_noise": 0.0,
          "kernel_scale": 0.2,
+         "L": 10.0,
          "ntics": scale,
          },
         ])
     if method == "bo":
         gp_params_update_interval = cores-1
-        skip_post = False
+        types = ["MED", "ML", "MAP"]
     else:
         gp_params_update_interval = 9999
-        skip_post = True
+        types = ["MD"]
     grid_tics = None
     if method == "grid":
         parallel_batches = samples
@@ -142,10 +138,10 @@ def run_experiment(seed, method, scale, cores, samples):
     file_path = os.path.dirname(os.path.realpath(__file__))
     exp = partial(inference_experiment,
                   inference_factory,
-                  skip_post=skip_post,
                   test_data=test_data,
                   obs_data=training_data,
                   plot_data=None,
+                  types=types,
                   n_cores=cores,
                   replicates=10,
                   region_size=0.02)
