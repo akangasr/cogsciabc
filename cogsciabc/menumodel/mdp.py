@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-"""An implementation of the Menu search model used in Kangasraasio et al. CHI 2017 paper.
+"""A simplified implementation of the Menu search model used in Kangasraasio et al. CHI 2017 paper.
 
 Definition of the MDP.
 """
@@ -20,29 +20,27 @@ class State():
     ----------
     obs_items : list of MenuItems
     focus : Focus
-    click : Click
     quit : Quit
     """
-    def __init__(self, obs_items, focus, click, quit):
+    def __init__(self, obs_items, focus, quit):
         self.obs_items = obs_items
         self.focus = focus
-        self.click = click
         self.quit = quit
 
     def __eq__(a, b):
         return a.__hash__() == b.__hash__()
 
     def __hash__(self):
-        return (tuple(self.obs_items) + (self.focus, self.click, self.quit)).__hash__()
+        return (tuple(self.obs_items) + (self.focus, self.quit)).__hash__()
 
     def __repr__(self):
-        return "({},{},{},{})".format(self.obs_items, self.focus, self.click, self.quit)
+        return "({},{},{},{})".format(self.obs_items, self.focus, self.quit)
 
     def __str__(self):
         return self.__repr__()
 
     def copy(self):
-        return State([item.copy() for item in self.obs_items], self.focus, self.click, self.quit)
+        return State([item.copy() for item in self.obs_items], self.focus, self.quit)
 
 class ItemRelevance(IntEnum):
     NOT_OBSERVED = 0
@@ -83,10 +81,6 @@ class MenuItem():
     def copy(self):
         return MenuItem(self.item_relevance, self.item_length)
 
-class Quit(IntEnum):
-    NOT_QUIT = 0
-    HAS_QUIT = 1
-
 class Focus(IntEnum):  # assume 8 items in menu
     ITEM_1 = 0
     ITEM_2 = 1
@@ -98,17 +92,6 @@ class Focus(IntEnum):  # assume 8 items in menu
     ITEM_8 = 7
     ABOVE_MENU = 8
 
-class Click(IntEnum):  # assume 8 items in menu
-    CLICK_1 = 0
-    CLICK_2 = 1
-    CLICK_3 = 2
-    CLICK_4 = 3
-    CLICK_5 = 4
-    CLICK_6 = 5
-    CLICK_7 = 6
-    CLICK_8 = 7
-    NOT_CLICKED = 8
-
 class Action(IntEnum):  # assume 8 items in menu
     LOOK_1 = 0
     LOOK_2 = 1
@@ -118,8 +101,7 @@ class Action(IntEnum):  # assume 8 items in menu
     LOOK_6 = 5
     LOOK_7 = 6
     LOOK_8 = 7
-    CLICK = 8
-    QUIT = 9
+    QUIT = 8
 
 
 class SearchTask(ParametricLoggingEpisodicTask):
@@ -143,15 +125,10 @@ class SearchTask(ParametricLoggingEpisodicTask):
         """ Returns the current reward based on the state of the environment
         """
         # this function should be deterministic and without side effects
-        if self.env.state.click != Click.NOT_CLICKED:
-            if self.env.clicked_item.item_relevance == ItemRelevance.TARGET_RELEVANCE:
-                # reward for clicking the correct item after seeing it
-                # target item should always have correct length
-                return self.reward_success
-            else:
-                # penalty for clicking the wrong item
-                return self.reward_failure
-        elif self.env.state.quit == Quit.HAS_QUIT:
+        if self.env.has_found_item is True:
+            # reward for finding target
+            return self.reward_success
+        elif self.env.has_quit is True:
             if self.env.target_present is False:
                 # reward for quitting when target is absent
                 return self.reward_success
@@ -166,11 +143,9 @@ class SearchTask(ParametricLoggingEpisodicTask):
         # this function should be deterministic and without side effects
         if self.env.n_actions >= self.max_number_of_actions_per_session:
             return True
-        elif self.env.state.click != Click.NOT_CLICKED:
-            # click ends task
+        elif self.env.has_found_item is True:
             return True
-        elif self.env.state.quit == Quit.HAS_QUIT:
-            # quit ends task
+        elif self.env.has_quit is True:
             return True
         return False
 
@@ -222,22 +197,10 @@ class SearchEnvironment(ParametricLoggingEnvironment):
         self.outdim = 1
         self.indim = 1
         self.discreteActions = True
-        self.numActions = self.n_items + 2 # look + click + quit
+        self.numActions = self.n_items + 1 # look + quit
 
     def clean(self):
         self.training_menus = list()
-
-    def to_dict(self):
-        return {
-                "menu_type": self.menu_type,
-                "menu_groups": self.menu_groups,
-                "menu_items_per_group": self.menu_items_per_group,
-                "semantic_levels": self.semantic_levels,
-                "gap_between_items": self.gap_between_items,
-                "prop_target_absent": self.prop_target_absent,
-                "length_observations": self.length_observations,
-                "n_training_menus": self.n_training_menus,
-                }
 
     def _get_menu(self):
         if self.training is True and len(self.training_menus) >= self.n_training_menus:
@@ -284,9 +247,8 @@ class SearchEnvironment(ParametricLoggingEnvironment):
         # state observed by agent
         obs_items = [MenuItem(ItemRelevance.NOT_OBSERVED, ItemLength.NOT_OBSERVED) for i in range(self.n_items)]
         focus = Focus.ABOVE_MENU
-        click = Click.NOT_CLICKED
-        quit = Quit.NOT_QUIT
-        self.state = State(obs_items, focus, click, quit)
+        quit = False
+        self.state = State(obs_items, focus, quit)
         self.prev_state = self.state.copy()
 
         # misc environment state variables
@@ -333,11 +295,14 @@ class SearchEnvironment(ParametricLoggingEnvironment):
         state = state.copy()
         # menu recall event may happen at first action
         if self.n_actions == 0:
-            if "menu_recall_probability" in self.v and self.random_state.rand() < float(self.v["menu_recall_probability"]):
+            if self.random_state.rand() < float(self.v["menu_recall_probability"]):
                 state.obs_items = [item.copy() for item in self.items]
 
-        # observe items's state
-        if action != Action.CLICK and action != Action.QUIT:
+        if action == Action.QUIT:
+            state.quit = True
+            focus_duration = 0
+            saccade_duration = 0
+        else:
             # saccade
             # item_locations are off-by-one to other lists
             if state.focus != Focus.ABOVE_MENU:
@@ -348,10 +313,7 @@ class SearchEnvironment(ParametricLoggingEnvironment):
             state.focus = Focus(int(action))  # assume these match
 
             # fixation
-            if "focus_duration_100ms" in self.v:
-                focus_duration = int(self.v["focus_duration_100ms"] * 100)
-            else:
-                focus_duration = 400
+            focus_duration = int(self.v["focus_duration_100ms"] * 100)
             # semantic observation at focus
             state = self._observe_relevance_at(state, int(state.focus))
             # possible length observations
@@ -363,41 +325,24 @@ class SearchEnvironment(ParametricLoggingEnvironment):
                 if int(state.focus) < self.n_items-1 and self.random_state.rand() < self.p_obs_len_adj:
                     state = self._observe_length_at(state, int(state.focus)+1)
             # possible semantic peripheral observations
-            if "prob_obs_adjacent" in self.v:
-                if int(state.focus) > 0 and self.random_state.rand() < float(self.v["prob_obs_adjacent"]):
-                    state = self._observe_relevance_at(state, int(state.focus)-1)
-                if int(state.focus) < self.n_items-1 and self.random_state.rand() < float(self.v["prob_obs_adjacent"]):
-                    state = self._observe_relevance_at(state, int(state.focus)+1)
+            if int(state.focus) > 0 and self.random_state.rand() < float(self.v["p_obs_adjacent"]):
+                state = self._observe_relevance_at(state, int(state.focus)-1)
+            if int(state.focus) < self.n_items-1 and self.random_state.rand() < float(self.v["p_obs_adjacent"]):
+                state = self._observe_relevance_at(state, int(state.focus)+1)
 
-        # choose item
-        elif action == Action.CLICK:
-            if state.focus != Focus.ABOVE_MENU:
-                state.click = Click(int(state.focus))  # assume these match
-            else:
-                # trying to select an item when not focusing on any item equals to quitting
-                state.quit = Quit.HAS_QUIT
-            if "selection_delay_s" in self.v:
-                focus_duration = int(self.v["selection_delay_s"] * 1000)
-            else:
-                focus_duration = 0
-            saccade_duration = 0
-
-        # quit without choosing any item
-        elif action == Action.QUIT:
-            state.quit = Quit.HAS_QUIT
-            focus_duration = 0
-            saccade_duration = 0
-
-        else:
-            raise ValueError("Unknown action: {}".format(action))
+            # found target -> will click
+            if state.focus != Focus.ABOVE_MENU and state.obs_items[int(state.focus)].item_relevance == ItemRelevance.TARGET_RELEVANCE:
+                focus_duration += int(self.v["selection_delay_s"] * 1000)
 
         return state, focus_duration, saccade_duration
 
     @property
-    def clicked_item(self):
-        if self.state.click == Click.NOT_CLICKED:
-            return None
-        return self.items[int(self.state.click)]  # assume indexes aligned
+    def has_found_item(self):
+        return self.state.focus != Focus.ABOVE_MENU and self.state.obs_items[int(self.state.focus)].item_relevance == ItemRelevance.TARGET_RELEVANCE
+
+    @property
+    def has_quit(self):
+        return self.state.quit
 
     def getSensors(self):
         """ Returns a scalar (enumerated) measurement of the state """
