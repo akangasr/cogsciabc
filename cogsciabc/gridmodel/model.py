@@ -266,15 +266,15 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
     precomp_obs_logprobs = dict()
     policy = rl.get_policy()
     rl.env.print_policy(policy)
-    logger.info("Evaluating loglikelihood of {} observations".format(len(observations)))
+    #logger.info("Evaluating loglikelihood of {} observations..".format(len(observations)))
     start_time1 = time.time()
     for obs_i in observations:
         if obs_i in precomp_obs_logprobs.keys():
-            logger.info("Using precomputed loglikelihood of {}".format(obs_i))
+            #logger.info("Using precomputed loglikelihood of {}".format(obs_i))
             logprob = precomp_obs_logprobs[obs_i]
             ind_log_obs_probs.append(logprob)
             continue
-        logger.info("Evaluating loglikelihood of {}".format(obs_i))
+        #logger.info("Evaluating loglikelihood of {}..".format(obs_i))
         start_time2 = time.time()
         n_paths = 0
         prob_i = 0.0
@@ -294,11 +294,13 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
         ind_log_obs_probs.append(logprob)
         end_time2 = time.time()
         duration2 = end_time2 - start_time2
-        logger.info("Processed {} paths in {} seconds ({} s/path)"
-                .format(n_paths, duration2, duration2/n_paths))
+        if duration2 > 30.0:
+            logger.info("Evaluated loglikelihood of {} in {:.2f}s".format(obs_i, duration2))
+        #logger.info("Processed {} paths in {} seconds ({} s/path)"
+        #        .format(n_paths, duration2, duration2/n_paths))
     end_time1 = time.time()
     duration1 = end_time1 - start_time1
-    logger.info("Logl evaluated in {} seconds".format(duration1))
+    #logger.info("Logl evaluated in {} seconds".format(duration1))
     return sum(ind_log_obs_probs) / scale
 
 def get_all_paths_for_obs(obs, path_max_len, env, policy=None):
@@ -309,8 +311,8 @@ def get_all_paths_for_obs(obs, path_max_len, env, policy=None):
     start_time = time.time()
     fill_path_tree(obs, obs.path_len, paths, path_max_len, env, policy)
     end_time = time.time()
-    logger.info("Constructing path tree of depth {} took {} seconds"
-            .format(obs.path_len, end_time-start_time))
+    #logger.info("Constructing path tree of depth {} took {} seconds"
+    #        .format(obs.path_len, end_time-start_time))
     return PathTreeIterator(obs, paths, obs.path_len)
 
 def prob_path(path, policy, path_max_len, goal_state, transition_prob):
