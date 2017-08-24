@@ -10,7 +10,7 @@ methods = ["grid", "neldermead", "bo"]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
-    "samples": [16, 81, 256, 625, 1296],
+    "samples": [16, 81, 256, 625, 1296, 2401],
     "time": {16: "0-00:30:00",
              81: "0-00:30:00",
              256: "0-01:00:00",
@@ -34,13 +34,13 @@ scripts = {
 "cogsciabc/cogsciabc/run_menumodel.py": {
     "id": "me",
     "samples": [16, 81, 256],
-    "time": {16:  "1-00:00:00",
-             81:  "2-00:00:00",
-             256: "3-00:00:00"},
+    "time": {16:  "0-04:00:00",
+             81:  "0-10:00:00",
+             256: "1-00:00:00"},
     "mem": {16:  5000,
             81:  5000,
             256: 5000},
-    "cores": 21,
+    "cores": 11,
     "scale": {16: 2,
               81: 3,
               256: 4},
@@ -52,7 +52,7 @@ for script, params in scripts.items():
         if params["id"] == "me" and method not in ["bo", "grid"]:
             continue
         for samples in params["samples"]:
-            if params["id"] == "le" and method == "bo" and samples > 625:
+            if params["id"] == "le" and method != "grid" and samples > 1296:
                 continue
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][samples]

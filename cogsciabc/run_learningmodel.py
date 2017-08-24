@@ -39,27 +39,33 @@ def run_experiment(seed, method, scale, cores, samples):
          "ntics": scale,
          },
         {"name": "LF",
-         "distr": "uniform",
+         "distr": "truncnorm",
          "minv": 0.001,
          "maxv": 0.10,
+         "mean": 0.2,
+         "std": 0.2,
          "acq_noise": 0.0,
          "kernel_scale": 0.02,  # 20% of range
          "L": 50.0,  # 5 units / range
          "ntics": scale,
          },
         {"name": "BLC",
-         "distr": "uniform",
+         "distr": "truncnorm",
          "minv": 0.0,
          "maxv": 20.0,
+         "mean": 10.0,
+         "std": 10.0,
          "acq_noise": 0.0,
          "kernel_scale": 4.0,  # 20% of range
          "L": 0.25,  # 5 units / range
          "ntics": scale,
          },
         {"name": "ANS",
-         "distr": "uniform",
+         "distr": "truncnorm",
          "minv": 0.001,
-         "maxv": 0.10,
+         "maxv": 0.15,
+         "mean": 0.3,
+         "std": 0.2,
          "acq_noise": 0.0,
          "kernel_scale": 0.02,  # 20% of range
          "L": 50.0,  # 5 units / range
@@ -68,7 +74,7 @@ def run_experiment(seed, method, scale, cores, samples):
         ])
     if method == "bo":
         gp_params_update_interval = 3*(cores-1)  # after every third batch
-        types = ["MED", "ML"]  # uniform prior
+        types = ["MED", "MAP"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
@@ -109,7 +115,7 @@ def run_experiment(seed, method, scale, cores, samples):
                   plot_data=plot_data,
                   types=types,
                   n_cores=cores,
-                  replicates=20,
+                  replicates=10,
                   region_size=0.02)
     run_and_report(exp, file_path)
 

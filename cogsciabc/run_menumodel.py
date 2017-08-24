@@ -96,12 +96,13 @@ def run_experiment(seed, method, scale, cores, samples):
                 trials_per_user_absent=9999).get())  # all
     rl_params = RLParams(
                 n_training_episodes=1000000,
-                n_episodes_per_epoch=50000,
+                n_episodes_per_epoch=10000,
                 n_simulation_episodes=1000,
-                q_alpha=1.0,
-                q_w=1.0,
+                q_alpha=0.1,
+                q_w=0.1,
                 q_gamma=0.98,
-                exp_epsilon=1.0,
+                q_iters=5,
+                exp_epsilon=0.2,
                 exp_decay=0.999999)
     menu_params = MenuParams(
                 menu_type="semantic",
@@ -114,7 +115,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 p_obs_len_cur=0.95,
                 p_obs_len_adj=0.89,
                 n_training_menus=10000,
-                max_number_of_actions_per_session=20)
+                max_number_of_actions_per_session=100)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
                 grid_tics=grid_tics,
@@ -144,7 +145,7 @@ def run_experiment(seed, method, scale, cores, samples):
                   plot_data=None,
                   types=types,
                   n_cores=cores,
-                  replicates=20,
+                  replicates=10,
                   region_size=0.02)
     run_and_report(exp, file_path)
 
