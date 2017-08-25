@@ -29,14 +29,14 @@ for grid_size in [7, 9, 11, 21, 31, 51]:
                     mem = 500
                     if n_features == 2:
                         if grid_size < 20:
-                            time = "0-01:00:00"
-                        else:
-                            time = "0-04:00:00"
-                    if n_features == 3:
-                        if grid_size < 20:
                             time = "0-02:00:00"
                         else:
                             time = "0-08:00:00"
+                    if n_features == 3:
+                        if grid_size < 20:
+                            time = "0-04:00:00"
+                        else:
+                            time = "1-00:00:00"
                 else:
                     ident = "r"
                     time = "0-00:20:00"
