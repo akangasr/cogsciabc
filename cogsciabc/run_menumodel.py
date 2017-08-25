@@ -33,7 +33,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 3.0,
          "std": 1.0,
          "acq_noise": 0.0,
-         "kernel_scale": 1.0,
+         "kernel_scale": 0.5,
          "L": 2.0,
          "ntics": scale,
          },
@@ -44,7 +44,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 0.3,
          "std": 0.3,
          "acq_noise": 0.0,
-         "kernel_scale": 0.2,
+         "kernel_scale": 0.1,
          "L": 10.0,
          "ntics": scale,
          },
@@ -55,7 +55,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 0.69,
          "std": 0.2,
          "acq_noise": 0.0,
-         "kernel_scale": 0.2,
+         "kernel_scale": 0.1,
          "L": 10.0,
          "ntics": scale,
          },
@@ -66,13 +66,13 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 0.93,
          "std": 0.2,
          "acq_noise": 0.0,
-         "kernel_scale": 0.2,
+         "kernel_scale": 0.1,
          "L": 10.0,
          "ntics": scale,
          },
         ])
     if method == "bo":
-        gp_params_update_interval = cores-1
+        gp_params_update_interval = (cores-1)*3  # after every third batch
         types = ["MED", "ML", "MAP"]
     else:
         gp_params_update_interval = 9999

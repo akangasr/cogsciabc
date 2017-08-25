@@ -90,7 +90,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 q_alpha=1.0,
                 q_w=1.0,
                 q_gamma=0.999,
-                q_iters=3,
+                q_iters=2,
                 exp_epsilon=0.2,
                 exp_decay=1.0)
     grid_params = GridParams(

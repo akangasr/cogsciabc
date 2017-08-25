@@ -43,7 +43,9 @@ for grid_size in [7, 9, 11, 21, 31, 51]:
                     mem = 300
                 identifier = "g{}f{}_{}_{}_{:02d}"\
                         .format(grid_size, n_features, ident, n_samples, rep+1)
-                hsh = hashlib.sha224(bytearray(identifier, 'utf-8')).digest()
+                group_id = "g{}f{}_{}_{:02d}"\
+                        .format(grid_size, n_features, n_samples, rep+1)
+                hsh = hashlib.sha224(bytearray(group_id, 'utf-8')).digest()
                 seed = int.from_bytes(hsh, byteorder='big') % seed_modulo
                 cmd = ["{}".format(script_name)]
                 cmd.append(" -t {}".format(time))
