@@ -100,6 +100,18 @@ def irl_relabeler2(label):
         return "13x13"
     if label == "g13f3":
         return "13x13"
+    if label == "g21f2":
+        return "21x21"
+    if label == "g21f3":
+        return "21x21"
+    if label == "g31f2":
+        return "31x31"
+    if label == "g31f3":
+        return "31x31"
+    if label == "g51f2":
+        return "51x51"
+    if label == "g51f3":
+        return "51x51"
     return label
 
 
@@ -236,14 +248,14 @@ def analyse(folder, label, variant):
     if variant == "irl":
         pd = Plotdef(title="title",
                  ylabel="error",
-                 hatches={"EXACT": "/", "APPROX": "\\", "RANDOM": ".", "7x7": "", "9x9": "", "11x11": "", "13x13": ""},
-                 colors={"EXACT": "orange", "APPROX": "skyblue", "RANDOM": "gray", "7x7": "blue", "9x9": "green", "11x11": "red", "13x13": "orange"},
+                 hatches={"EXACT": "/", "APPROX": "\\", "RANDOM": "."},
+                 colors={"EXACT": "orange", "APPROX": "skyblue", "RANDOM": "gray", "7x7": "blue", "9x9": "green", "11x11": "red", "13x13": "orange", "21x21": "magenta", "31x31": "yellow", "51x51": "black"},
                  figsize=(5,5),
                  errbars=True,
                  legend_loc="in",
                  legend_cols=1,
                  bars=7,
-                 order=["7x7", "9x9", "11x11", "13x13", "RANDOM"])
+                 order=["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51", "RANDOM"])
         print("Ground truth error")
         datas = dict()
         rnd = list()
