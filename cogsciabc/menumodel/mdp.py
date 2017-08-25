@@ -34,7 +34,7 @@ class State():
         return (tuple(self.obs_items) + (self.focus, self.quit)).__hash__()
 
     def __repr__(self):
-        return "({},{},{},{})".format(self.obs_items, self.focus, self.quit)
+        return "({},{},{})".format(self.obs_items, self.focus, self.quit)
 
     def __str__(self):
         return self.__repr__()

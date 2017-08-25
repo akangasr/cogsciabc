@@ -81,10 +81,10 @@ def get_model(p, elfi_p, rl_p, observation):
     simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                *elfi_p,
                                model=model,
+                               observed=observation,
                                name="simulator")
     summary = elfi.Summary(elfi.tools.vectorize(summary_function),
                            simulator,
-                           observed=observation,
                            model=model,
                            name="summary")
     discrepancy = elfi.Discrepancy(elfi.tools.vectorize(discrepancy_function),
@@ -95,14 +95,20 @@ def get_model(p, elfi_p, rl_p, observation):
 
 
 def summary_function(obs):
+    while type(obs) is not dict:
+        obs = obs[0]
     return [Observation(ses["action_duration"], ses["target_present"]) for ses in obs["sessions"]]
 
 
 def discrepancy_function(*simulated, observed=None):
-    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated[0])
-    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed[0])
-    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated[0])
-    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed[0])
+    while type(simulated[0]) is not Observation:
+        simulated = simulated[0]
+    while type(observed[0]) is not Observation:
+        observed = observed[0]
+    tct_mean_pre_obs, tct_std_pre_obs = _tct_mean_std(present=True, obs=simulated)
+    tct_mean_pre_sim, tct_std_pre_sim = _tct_mean_std(present=True, obs=observed)
+    tct_mean_abs_obs, tct_std_abs_obs = _tct_mean_std(present=False, obs=simulated)
+    tct_mean_abs_sim, tct_std_abs_sim = _tct_mean_std(present=False, obs=observed)
     disc = np.abs(tct_mean_pre_obs - tct_mean_pre_sim) ** 2 \
             + np.abs(tct_std_pre_obs - tct_std_pre_sim) \
             + np.abs(tct_mean_abs_obs - tct_mean_abs_sim) ** 2 \

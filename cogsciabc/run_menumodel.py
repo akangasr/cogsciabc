@@ -17,6 +17,7 @@ from elfirl.model import RLParams
 
 from cogsciabc.menumodel.model import MenuParams, get_model, summary_function
 from cogsciabc.menumodel.observation import BaillyData
+from cogsciabc.menumodel.plot import plot_data
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args
 
@@ -82,18 +83,18 @@ def run_experiment(seed, method, scale, cores, samples):
         grid_tics = p.get_grid_tics(seed)
     else:
         parallel_batches = cores-1
-    training_data = summary_function(BaillyData(
+    training_data = BaillyData(
                 menu_type="Semantic",
                 allowed_users=[],
-                excluded_users=["S20", "S21", "S22", "S23", "S24"],
+                excluded_users=["S22", "S6", "S41", "S7", "S5", "S8", "S20", "S36", "S24"],
                 trials_per_user_present=9999,  # all
-                trials_per_user_absent=9999).get())  # all
-    test_data = summary_function(BaillyData(
+                trials_per_user_absent=9999).get()  # all
+    test_data = BaillyData(
                 menu_type="Semantic",
-                allowed_users=["S20", "S21", "S22", "S23", "S24"],
+                allowed_users=["S22", "S6", "S41", "S7", "S5", "S8", "S20", "S36", "S24"],
                 excluded_users=[],
                 trials_per_user_present=9999,  # all
-                trials_per_user_absent=9999).get())  # all
+                trials_per_user_absent=9999).get()  # all
     rl_params = RLParams(
                 n_training_episodes=1000000,
                 n_episodes_per_epoch=10000,
@@ -129,6 +130,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
+                observed_node_name="simulator",
                 abc_threshold_delta=0.01,
                 batch_size=1,
                 sampling_type=method,
@@ -142,7 +144,7 @@ def run_experiment(seed, method, scale, cores, samples):
                   inference_factory,
                   test_data=test_data,
                   obs_data=training_data,
-                  plot_data=None,
+                  plot_data=plot_data,
                   types=types,
                   n_cores=cores,
                   replicates=10,
