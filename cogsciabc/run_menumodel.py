@@ -96,8 +96,8 @@ def run_experiment(seed, method, scale, cores, samples):
                 q_w=0.3,
                 q_gamma=0.98,
                 q_iters=2,
-                exp_epsilon=0.2,
-                exp_decay=0.0)
+                exp_epsilon=0.1,
+                exp_decay=1.0)
     menu_params = MenuParams(
                 menu_type="semantic",
                 menu_groups=2,
