@@ -81,17 +81,17 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         path_max_len = 12  # limit to make exact method feasible
     else:
         path_max_len = 1000
-    training_eps = 1000 * grid_size
+    training_eps = 3000 * grid_size
 
     rl_params = RLParams(
                 n_training_episodes=training_eps,
                 n_episodes_per_epoch=1000,
                 n_simulation_episodes=1000,
-                q_alpha=1.0,
-                q_w=1.0,
-                q_gamma=0.999,
+                q_alpha=0.1,
+                q_w=0.5,
+                q_gamma=0.98,
                 q_iters=2,
-                exp_epsilon=0.2,
+                exp_epsilon=0.1,
                 exp_decay=1.0)
     grid_params = GridParams(
                 grid_size=grid_size,

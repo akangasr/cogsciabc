@@ -60,19 +60,12 @@ def run_experiment(seed, method, scale, cores, samples):
          "ntics": scale,
          },
         {"name": "p_obs_adjacent",
-         "distr": "truncnorm",
-         "minv": 0.0,
-         "maxv": 1.0,
-         "mean": 0.93,
-         "std": 0.2,
-         "acq_noise": 0.0,
-         "kernel_scale": 0.1,
-         "L": 10.0,
-         "ntics": scale,
+         "distr": "constant",
+         "val": 0.93
          },
         ])
     if method == "bo":
-        gp_params_update_interval = (cores-1)*3  # after every third batch
+        gp_params_update_interval = (cores-1)*2  # after every second batch
         types = ["MED", "ML", "MAP"]
     else:
         gp_params_update_interval = 9999
@@ -96,15 +89,15 @@ def run_experiment(seed, method, scale, cores, samples):
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get()  # all
     rl_params = RLParams(
-                n_training_episodes=1000000,
-                n_episodes_per_epoch=10000,
+                n_training_episodes=5000000,
+                n_episodes_per_epoch=20000,
                 n_simulation_episodes=1000,
                 q_alpha=0.1,
-                q_w=0.1,
+                q_w=0.3,
                 q_gamma=0.98,
-                q_iters=5,
+                q_iters=2,
                 exp_epsilon=0.2,
-                exp_decay=0.999999)
+                exp_decay=0.0)
     menu_params = MenuParams(
                 menu_type="semantic",
                 menu_groups=2,

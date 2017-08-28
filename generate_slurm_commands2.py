@@ -3,11 +3,11 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 5
+n_replicates = 2
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11
-for grid_size in [7, 9, 11, 21, 31, 51]:
+for grid_size in [7, 9, 11, 21, 31]:
     for method in ["exact", "approx", "random"]:
         for n_features in [2,3]:
             if grid_size > 11 and method == "exact":
@@ -16,27 +16,27 @@ for grid_size in [7, 9, 11, 21, 31, 51]:
                 if n_features == 2:
                     n_samples = 200
                 if n_features == 3:
-                    n_samples = 400
+                    n_samples = 600
                 if method == "exact":
                     ident = "e"
                     mem = 500
                     if n_features == 2:
-                        time = "0-12:00:00"
-                    if n_features == 3:
                         time = "1-00:00:00"
+                    if n_features == 3:
+                        time = "3-00:00:00"
                 elif "approx" in method:
                     ident = "a"
                     mem = 500
                     if n_features == 2:
                         if grid_size < 20:
-                            time = "0-02:00:00"
-                        else:
-                            time = "0-08:00:00"
-                    if n_features == 3:
-                        if grid_size < 20:
                             time = "0-04:00:00"
                         else:
                             time = "1-00:00:00"
+                    if n_features == 3:
+                        if grid_size < 20:
+                            time = "0-12:00:00"
+                        else:
+                            time = "2-00:00:00"
                 else:
                     ident = "r"
                     time = "0-00:20:00"
@@ -58,4 +58,4 @@ for grid_size in [7, 9, 11, 21, 31, 51]:
                 print("".join(cmd))
         print("")
 
-print("./elfie/slurm/run_experiment_slurm.sh -t 5-00:00:00 -m 10000 -n 21 -j cogsciabc/cogsciabc/run_menumodel.py -i menu_bo_1000_00 -p 123456 bo 1 21 1000;")
+print("./elfie/slurm/run_experiment_slurm.sh -t 5-00:00:00 -m 10000 -n 41 -j cogsciabc/cogsciabc/run_menumodel.py -i menu_bo_1000_00 -p 123456 bo 1 41 1000;")

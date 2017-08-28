@@ -190,7 +190,8 @@ class SearchEnvironment(ParametricLoggingEnvironment):
                                    "duration_saccade_ms",
                                    "action_duration",
                                    "action",
-                                   "gaze_location"]
+                                   "gaze_location",
+                                   "path"]
 
         # technical variables
         self.discreteStates = True

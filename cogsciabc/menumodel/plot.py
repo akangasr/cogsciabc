@@ -56,13 +56,12 @@ def calculate(data):
         else:
             raise ValueError("Unknown feature: %s" % (k))
 
+        bins = np.hstack((np.linspace(minbin, maxbin, nbins), [maxbin+(maxbin-minbin)/float(nbins)]))
         if feature_type == "histogram":
-            bins = np.hstack((np.linspace(minbin, maxbin, nbins), [maxbin+(maxbin-minbin)/float(nbins)]))
             fout = [fi if fi < maxbin else maxbin+1e-10 for fi in f]
             h, e = np.histogram(fout, bins=bins)
             hnorm = h / sum(h)
         elif feature_type == "graph":
-            bins = np.hstack((np.linspace(minbin, maxbin, nbins), [maxbin+(maxbin-minbin)/float(nbins)]))
             hh, e = np.histogram(list(), bins=bins)
             hr = [0] * len(hh)
             n = [0] * len(hh)
@@ -76,6 +75,7 @@ def calculate(data):
                     h.append(0)
                 else:
                     h.append(hr[i] / float(n[i]))
+            print("graph", hr, n, h)
 
         distr[k] = {
                 "feature_type": feature_type,

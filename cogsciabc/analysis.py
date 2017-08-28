@@ -254,7 +254,7 @@ def analyse(folder, label, variant):
                  errbars=True,
                  legend_loc="in",
                  legend_cols=1,
-                 bars=7,
+                 bars=10,
                  order=["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51", "RANDOM"])
         print("Ground truth error")
         datas = dict()
