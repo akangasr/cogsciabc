@@ -122,6 +122,8 @@ def run_experiment(seed, method, scale, cores, samples):
                 n_samples=samples,
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
+                gp_params_optimizer="simplex",
+                gp_params_max_opt_iters=10,
                 gp_params_update_interval=gp_params_update_interval,
                 observed_node_name="simulator",
                 abc_threshold_delta=0.01,

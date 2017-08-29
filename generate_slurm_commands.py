@@ -3,7 +3,7 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 3
+n_replicates = 5
 seed_modulo = 10000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
