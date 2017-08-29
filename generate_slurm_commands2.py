@@ -3,7 +3,7 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 15
+n_replicates = 10
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11

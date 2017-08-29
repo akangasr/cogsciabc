@@ -110,7 +110,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
                 gp_params_optimizer="simplex",
-                gp_params_max_opt_iters=10,
+                gp_params_max_opt_iters=20,
                 gp_params_update_interval=gp_params_update_interval,
                 batch_size=1,
                 sampling_type="bo",
