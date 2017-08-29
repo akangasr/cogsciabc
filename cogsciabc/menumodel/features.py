@@ -50,47 +50,48 @@ def get_proportion_of_gaze_to_target(session):
     n_gazes = 0
     if len(session["gaze_location"]) < 1:
         return (session["target_idx"], 0)
-    for gaze_location in session["gaze_location"][:-1]: # last gaze location is end action, not a fixation
+    for gaze_location in session["gaze_location"]:
         n_gazes += 1
         if gaze_location == session["target_idx"]:
             n_gazes_to_target += 1
     if n_gazes == 0:
         return (session["target_idx"], 0)
-    return (session["target_idx"], n_gazes_to_target / n_gazes)
+    return (session["target_idx"], float(n_gazes_to_target) / n_gazes)
 
 def get_fixation_durations(session):
-    if len(session["duration_focus_ms"]) < 1:
-        return list()
-    ret = session["duration_focus_ms"][:-1]  # assume all actions are eye fixations except last action
-    if len(ret) < 1:
-        # only end action
-        ret = session["duration_focus_ms"]
-    else:
-        # adds the possible last action duration into the last fixation's duration
-        ret[-1] += session["duration_focus_ms"][-1]
-    return ret
+    if session["action"][-1] == 8:
+        return session["duration_focus_ms"][:-1]
+    return session["duration_focus_ms"]
 
 def get_length_of_skips(session):
-    # assume all actions are eye fixations except last action
-    if len(session["gaze_location"]) < 3:
-        # need at least 2 fixations and one final action
+    if session["action"][-1] == 8:
+        locs = session["gaze_location"][:-1]
+    else:
+        locs = session["gaze_location"]
+    if len(locs) < 2:
         return list()
     ret = list()
-    prev_loc = session["gaze_location"][0]
-    for i in range(1, len(session["gaze_location"])-1):
-        cur_loc = session["gaze_location"][i]
+    prev_loc = locs[0]
+    for i in range(1, len(locs)-1):
+        cur_loc = locs[i]
         ret.append(abs(cur_loc - prev_loc))
         prev_loc = cur_loc
     return ret
 
 def get_saccade_durations(session):
-    return session["duration_saccade_ms"][:-1]  # assume all actions are eye fixations except last action
+    if session["action"][-1] == 8:
+        return session["duration_saccade_ms"][:-1]
+    return session["duration_saccade_ms"]
 
 def get_number_of_saccades(session):
-    return len(session["action"]) - 1  # assume all actions are eye fixations except last action
+    if session["action"][-1] == 8:
+        return len(session["action"]) - 1
+    return len(session["action"])
 
 def get_fixation_locations(session):
-    return session["action"][:-1]  # assume all actions are eye fixations except last action
+    if session["action"][-1] == 8:
+        return session["action"][:-1]
+    return session["action"]
 
 def is_valid_condition(session, target_present):
     if target_present is None:

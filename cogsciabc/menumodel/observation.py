@@ -67,17 +67,14 @@ class BaillyData():
         # assume user did not make mistakes
         if target == None:
             # missing item
-            action = list_len + 1 # quit
-        else:
-            # item in list
-            action = list_len # select
-        self.step_data["observation"].append(None)
-        self.step_data["action"].append(action)
-        self.step_data["reward"].append(0)
-        self.step_data["gaze_location"].append(gaze)
-        self.step_data["duration_focus_ms"].append(0)
-        self.step_data["duration_saccade_ms"].append(0)
-        self.step_data["action_duration"].append(0)
+            action = list_len # quit
+            self.step_data["observation"].append(None)
+            self.step_data["action"].append(action)
+            self.step_data["reward"].append(0)
+            self.step_data["gaze_location"].append(gaze)
+            self.step_data["duration_focus_ms"].append(0)
+            self.step_data["duration_saccade_ms"].append(0)
+            self.step_data["action_duration"].append(0)
 
     def _add_look_step(self, gaze, saccade_ms, focus_ms):
         """ Add look step to log
