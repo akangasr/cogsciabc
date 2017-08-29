@@ -4,7 +4,6 @@ import elfi
 from elfie.serializable import Serializable
 from elfirl.model import RLModel, RLParams
 from cogsciabc.menumodel.mdp import SearchEnvironment, SearchTask
-from cogsciabc.menumodel.features import get_feature_set, plot_features
 
 import logging
 logger = logging.getLogger(__name__)

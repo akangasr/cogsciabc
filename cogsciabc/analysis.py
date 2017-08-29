@@ -160,7 +160,7 @@ def plot_barchart(datas, pd):
         line.set_color("lightgrey")
         line.set_linestyle("-")
 
-#    bars = list()
+    bars = list()
     labels = list()
     i = 1
     for label in pd.order:
@@ -178,12 +178,13 @@ def plot_barchart(datas, pd):
                 ax.errorbar(ind[i], means[0], fmt=" ",
                          yerr=stds[0], ecolor="black", capsize=5, zorder=4)
             i += 1
-#        bars.append(bar)
+            bars.append(bar)
 
     ax.set_ylabel(pd.ylabel, fontsize=16)
     ax.set_title(pd.title, fontsize=20)
-    ax.set_xticks(ind[1:])
-    ax.set_xticklabels([k for k in labels], fontsize=16)
+    ax.set_xticks([])
+    #ax.set_xticks(ind[1:])
+    #ax.set_xticklabels([k for k in labels], fontsize=16)
     pl.tick_params(axis='x',which='both',bottom='off',top='off')
     pl.setp(ax.get_yticklabels(), fontsize=16)
     pl.xlim(ind[0]-0.1, ind[-1]+0.1+bar_width)
@@ -193,12 +194,13 @@ def plot_barchart(datas, pd):
     if hasattr(pd, "yscale"):
         pl.yscale(pd.yscale)
 
-    #if pd.legend_loc == "in":
-    #    ax.legend([b[0] for b in bars], [d["name"] for d in datas], loc=2,
-    #          ncol=pd.legend_cols, fontsize=16)
-    #if ed.legend_loc == "out":
-    #    ax.legend([b[0] for b in bars], [d["name"] for d in datas], loc='upper center',
-    #          bbox_to_anchor=(0.5, -0.1), ncol=pd.legend_cols, fontsize=16)
+    if pd.legend_loc == "in":
+        ax.legend([b[0] for b in bars], [k for k in labels], loc=2,
+              ncol=pd.legend_cols, fontsize=16)
+    if pd.legend_loc == "out":
+        ax.legend([b[0] for b in bars], [k for k in labels], loc='upper center',
+              bbox_to_anchor=(0.5, -0.1), ncol=pd.legend_cols, fontsize=16)
+        fig.subplots_adjust(bottom=0.5)
     pl.show()
 
 
@@ -252,9 +254,9 @@ def analyse(folder, label, variant):
                  colors={"EXACT": "orange", "APPROX": "skyblue", "RANDOM": "gray", "7x7": "blue", "9x9": "green", "11x11": "red", "13x13": "orange", "21x21": "magenta", "31x31": "yellow", "51x51": "black"},
                  figsize=(5,5),
                  errbars=True,
-                 legend_loc="in",
-                 legend_cols=1,
-                 bars=10,
+                 legend_loc="out",
+                 legend_cols=3,
+                 bars=9,
                  order=["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51", "RANDOM"])
         print("Ground truth error")
         datas = dict()
@@ -277,8 +279,8 @@ def analyse(folder, label, variant):
         datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None)}
         plot_barchart(datas, pd)
 
-        pd.bars = 10
-        pd.order = ["7x7", "9x9", "11x11", "13x13"]
+        pd.bars = 13
+        pd.order = ["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51"]
         print("Prediction error")
         datas = dict()
         for k, v in groups.items():

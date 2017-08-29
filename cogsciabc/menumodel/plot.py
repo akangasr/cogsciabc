@@ -75,7 +75,7 @@ def calculate(data):
                     h.append(0)
                 else:
                     h.append(hr[i] / float(n[i]))
-            print("graph", hr, n, h)
+            hnorm = h
 
         distr[k] = {
                 "feature_type": feature_type,
@@ -101,10 +101,7 @@ def plot_data(pdf, figsize, data, title):
         plotidx += 1
         feature_type = res[varname]["feature_type"]
         color = "g"
-        if feature_type == "histogram":
-            bars = res[varname]["hnorm"]
-        elif feature_type == "graph":
-            bars = res[varname]["h"]
+        bars = res[varname]["hnorm"]
         bins = res[varname]["e"]
         plot_histogram(bars, bins, color)
         vals = res[varname]["f"]
