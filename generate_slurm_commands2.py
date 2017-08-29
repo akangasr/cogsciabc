@@ -3,7 +3,7 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 2
+n_replicates = 15
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11
@@ -58,4 +58,4 @@ for grid_size in [7, 9, 11, 21, 31]:
                 print("".join(cmd))
         print("")
 
-print("./elfie/slurm/run_experiment_slurm.sh -t 5-00:00:00 -m 10000 -n 41 -j cogsciabc/cogsciabc/run_menumodel.py -i menu_bo_1000_00 -p 123456 bo 1 41 1000;")
+#print("./elfie/slurm/run_experiment_slurm.sh -t 5-00:00:00 -m 10000 -n 41 -j cogsciabc/cogsciabc/run_menumodel.py -i menu_bo_1000_00 -p 123456 bo 1 41 1000;")

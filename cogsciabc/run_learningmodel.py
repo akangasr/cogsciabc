@@ -73,7 +73,7 @@ def run_experiment(seed, method, scale, cores, samples):
          }
         ])
     if method == "bo":
-        gp_params_update_interval = 3*(cores-1)  # after every third batch
+        gp_params_update_interval = min(5*(cores-1), samples/2)  # at least every fifth batch
         types = ["MED", "MAP"]
     else:
         gp_params_update_interval = 9999

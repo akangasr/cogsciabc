@@ -65,8 +65,8 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         ])
     if method == "bo":
-        gp_params_update_interval = (cores-1)*2  # after every second batch
-        types = ["MED", "ML", "MAP"]
+        gp_params_update_interval = min((cores-1)*2, samples)  # at least every third batch
+        types = ["MED", "MAP"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
@@ -90,9 +90,9 @@ def run_experiment(seed, method, scale, cores, samples):
                 trials_per_user_absent=9999).get()  # all
     rl_params = RLParams(
                 n_training_episodes=5000000,
-                n_episodes_per_epoch=20000,
-                n_simulation_episodes=1000,
-                q_alpha=0.1,
+                n_episodes_per_epoch=10000,
+                n_simulation_episodes=10000,
+                q_alpha=0.05,
                 q_w=0.3,
                 q_gamma=0.98,
                 q_iters=2,
@@ -117,7 +117,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
-                L=p.get_L(),
+#                L=p.get_L(),
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,

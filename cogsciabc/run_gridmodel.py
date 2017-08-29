@@ -31,7 +31,6 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "maxv": 0.0,
              "acq_noise": 0.1,
              "kernel_scale": 0.1,
-             "L": 1.0,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -40,7 +39,6 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "maxv": 0.0,
              "acq_noise": 0.1,
              "kernel_scale": 0.1,
-             "L": 1.0,
              "ntics": 0,
              },
             ])
@@ -52,7 +50,6 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "maxv": 0.0,
              "acq_noise": 0.1,
              "kernel_scale": 0.1,
-             "L": 1.0,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -61,7 +58,6 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "maxv": 0.0,
              "acq_noise": 0.1,
              "kernel_scale": 0.1,
-             "L": 1.0,
              "ntics": 0,
              },
             {"name": "feature3_value",
@@ -70,12 +66,11 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "maxv": 0.0,
              "acq_noise": 0.1,
              "kernel_scale": 0.1,
-             "L": 1.0,
              "ntics": 0,
              },
             ])
     elfi_params = p.get_elfi_params()
-    gp_params_update_interval = (cores-1)*3  # after every third batch
+    gp_params_update_interval = (cores-1)*5  # after every fifth batch
     parallel_batches = cores-1
     if grid_size < 12:
         path_max_len = 12  # limit to make exact method feasible
@@ -109,7 +104,6 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
-                L=p.get_L(),
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
