@@ -65,7 +65,7 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         ])
     if method == "bo":
-        gp_params_update_interval = min((cores-1)*2, samples)  # at least every third batch
+        gp_params_update_interval = cores-1
         types = ["MED", "MAP"]
     else:
         gp_params_update_interval = 9999
@@ -117,7 +117,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
-#                L=p.get_L(),
+                kernel_prior={"scale_E": 0.2, "scale_V": 0.5, "var_E": 5.0, "var_V": 10.0},
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,

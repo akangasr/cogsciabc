@@ -30,7 +30,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
+             "kernel_scale": 0.2,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -38,7 +38,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
+             "kernel_scale": 0.2,
              "ntics": 0,
              },
             ])
@@ -49,7 +49,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
+             "kernel_scale": 0.2,
              "ntics": 0,
              },
             {"name": "feature2_value",
@@ -57,7 +57,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
+             "kernel_scale": 0.2,
              "ntics": 0,
              },
             {"name": "feature3_value",
@@ -65,12 +65,12 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              "minv": -1.0,
              "maxv": 0.0,
              "acq_noise": 0.1,
-             "kernel_scale": 0.1,
+             "kernel_scale": 0.2,
              "ntics": 0,
              },
             ])
     elfi_params = p.get_elfi_params()
-    gp_params_update_interval = (cores-1)*5  # after every fifth batch
+    gp_params_update_interval = cores-1  # after every batch
     parallel_batches = cores-1
     if grid_size < 12:
         path_max_len = 12  # limit to make exact method feasible
@@ -80,7 +80,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
 
     rl_params = RLParams(
                 n_training_episodes=training_eps,
-                n_episodes_per_epoch=1000,
+                n_episodes_per_epoch=500,
                 n_simulation_episodes=1000,
                 q_alpha=0.1,
                 q_w=0.5,
@@ -104,6 +104,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
+                kernel_prior={"scale_E": 0.1, "scale_V": 0.3, "var_E": 5.0, "var_V": 10.0},
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
