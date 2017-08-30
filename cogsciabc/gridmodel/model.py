@@ -153,7 +153,7 @@ def get_dataset(p, elfi_p, rl_p, param_values, seed, max_sim_path_len=1e10):
     print(summary)
     return summary
 
-def get_model(exact, p, elfi_p, rl_p, observation, path_max_len):
+def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
     if p.initial_state == "edge":
         initial_state_generator = InitialStateUniformlyAtEdge(p.grid_size)
     elif p.initial_state == "anywhere":
@@ -187,7 +187,7 @@ def get_model(exact, p, elfi_p, rl_p, observation, path_max_len):
                 env=env,
                 task=task,
                 clean_after_call=False)
-    if exact is True:
+    if variant == "exact":
         simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
                                    *elfi_p,
                                    name="simulator")
@@ -197,10 +197,24 @@ def get_model(exact, p, elfi_p, rl_p, observation, path_max_len):
                                name="summary")
         discrepancy = elfi.Discrepancy(elfi.tools.vectorize(partial(logl_discrepancy,
                                                                     rl, p.max_number_of_actions_per_session, goal_state,
-                                                                    env.transition_prob)),
+                                                                    env.transition_prob, full=True)),
                                        summary,
                                        name="discrepancy")
-    else:
+    if variant == "sample":
+        simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
+                                   *elfi_p,
+                                   name="simulator")
+        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len)),
+                               simulator,
+                               observed=observation,
+                               name="summary")
+        discrepancy = elfi.Discrepancy(elfi.tools.vectorize(partial(logl_discrepancy,
+                                                                    rl, p.max_number_of_actions_per_session, goal_state,
+                                                                    env.transition_prob, full=False)),
+                                       summary,
+                                       name="discrepancy")
+
+    if variant == "approx":
         simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                    *elfi_p,
                                    name="simulator")
@@ -250,14 +264,14 @@ def passthrough_summary_function(path_max_len, data):
     else:
         return filt_summary(path_max_len, data)
 
-def logl_discrepancy(rl, path_max_len, goal_state, transition_prob, *sim_data, observed=None):
+def logl_discrepancy(rl, path_max_len, goal_state, transition_prob, *sim_data, observed=None, full=True):
     parameters = sim_data[0].parameters
     random_state = sim_data[0].random_state
     return np.array([-1 * evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
-                                                 parameters, observed[0], random_state)])
+                                                 parameters, observed[0], random_state, full=full)])
 
 def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
-                           parameters, observations, random_state, scale=100.0):
+                           parameters, observations, random_state, scale=100.0, full=True):
     # Note: scaling != 1.0 will not preserve proportionality of likelihood
     # (only used as a hack to make GP implementation work, as it breaks with too large values)
     assert len(observations) > 0
@@ -266,6 +280,9 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
     precomp_obs_logprobs = dict()
     policy = rl.get_policy()
     rl.env.print_policy(policy)
+    if full is not True:
+        sims = rl.simulate(random_state=random_state)
+        sim_paths = [ses["path"] for ses in sims["sessions"]]
     #logger.info("Evaluating loglikelihood of {} observations..".format(len(observations)))
     start_time1 = time.time()
     for obs_i in observations:
@@ -278,15 +295,26 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
         start_time2 = time.time()
         n_paths = 0
         prob_i = 0.0
-        path_iterator = get_all_paths_for_obs(obs_i, path_max_len, rl.env, policy)
+        if full is True:
+            path_iterator = get_all_paths_for_obs(obs_i, path_max_len, rl.env, policy)
+        else:
+            path_iterator = sim_paths
         for path in path_iterator:
-            n_paths += 1
             p_obs = prob_obs(obs_i, path)
-            assert p_obs > 0, "Paths should all have positive observation probability, but p({})={}"\
-                    .format(path, p_obs)
+            if full is not True and p_obs == 0:
+                continue
+            if full is True:
+                assert p_obs > 0, "Paths should all have positive observation probability, but p({})={}"\
+                        .format(path, p_obs)
             p_path = prob_path(path, policy, path_max_len, goal_state, transition_prob)
             if p_path > 0:
                 prob_i += p_obs * p_path
+            n_paths += 1
+        if full is not True:
+            if n_paths == 0:
+                prob_i = 1.0 / len(sim_paths)  # TODO: what would be correct here?
+            else:
+                prob_i /= n_paths  # normalize
         assert 0.0 - 1e-10 < prob_i < 1.0 + 1e-10 , "Probability should be between 0 and 1 but was {}"\
                 .format(prob_i)
         logprob = np.log(prob_i)

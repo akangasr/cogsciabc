@@ -127,7 +127,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, max_sim_path_len=path_max_len)
         test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
 
-    if method == "exact":
+    if method in ["exact", "sample"]:
         types = ["MED"]
         # hack
         from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase
@@ -135,7 +135,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                                 obs_data, test_data, plot_data, types, replicates, region_size,
                                 ground_truth, n_cores, path_max_len, pdf, figsize):
             elfi.new_model()
-            model = get_model(True, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model(method, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
             inference_task = BolfiFactory(model, bolfi_params).get()
             ret = dict()
             ret["n_cores"] = n_cores
@@ -145,7 +145,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
             ret["plots_logl"] = inference_task.plot_post(pdf, figsize)
 
             elfi.new_model()
-            model = get_model(False, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
             inference_task = BolfiFactory(model, bolfi_params).get()
 
             ret = PointEstimateSimulationPhase(replicates=replicates, region_size=region_size).run(inference_task, ret)
@@ -169,7 +169,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                       path_max_len=path_max_len)
     if method == "approx":
         types = ["ML"]
-        model = get_model(False, grid_params, elfi_params, rl_params, training_data, path_max_len)
+        model = get_model(method, grid_params, elfi_params, rl_params, training_data, path_max_len)
         inference_factory = BolfiFactory(model, bolfi_params)
         exp = partial(inference_experiment,
                       inference_factory,
@@ -189,7 +189,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                                 obs_data, test_data, plot_data, types, replicates, region_size,
                                 ground_truth, n_cores, path_max_len, seed, pdf, figsize):
             elfi.new_model()
-            model = get_model(False, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
             inference_task = BolfiFactory(model, bolfi_params).get()
             bounds = elfi_params.get_bounds()
             ret = dict()
