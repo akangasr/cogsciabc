@@ -169,7 +169,10 @@ def plot_barchart(datas, pd):
             continue
             i += 1
         for method in sorted(datas[label].keys()):
-            labels.append("{} {}".format(label, method))
+            if label == method:
+                labels.append("{}".format(label))
+            else:
+                labels.append("{} {}".format(label, method))
             means, stds, _ = datas[label][method]
             print(label, method)
             bar = ax.bar(ind[i], means[0], bar_width, color=pd.colors[label],
@@ -248,16 +251,16 @@ def analyse(folder, label, variant):
         #                        relabeler=cs_relabeler)
 
     if variant == "irl":
-        pd = Plotdef(title="title",
-                 ylabel="error",
-                 hatches={"EXACT": "/", "APPROX": "\\", "RANDOM": "."},
-                 colors={"EXACT": "orange", "APPROX": "skyblue", "RANDOM": "gray", "7x7": "blue", "9x9": "green", "11x11": "red", "13x13": "orange", "21x21": "magenta", "31x31": "yellow", "51x51": "black"},
-                 figsize=(5,5),
+        pd = Plotdef(title="Error to ground truth",
+                 ylabel="RMSE",
+                 hatches={"EXACT": "//", "APPROX": "/", "RANDOM": "."},
+                 colors={"7x7": "linen", "9x9": "wheat", "11x11": "burlywood", "13x13": "peru", "21x21": "chocolate", "31x31": "saddlebrown", "RANDOM": "maroon"},
+                 figsize=(7,5),
                  errbars=True,
                  legend_loc="out",
-                 legend_cols=3,
-                 bars=9,
-                 order=["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51", "RANDOM"])
+                 legend_cols=2,
+                 bars=7,
+                 order=["9x9", "11x11", "13x13", "21x21", "31x31", "RANDOM"])
         print("Ground truth error")
         datas = dict()
         rnd = list()
@@ -279,8 +282,11 @@ def analyse(folder, label, variant):
         datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None)}
         plot_barchart(datas, pd)
 
-        pd.bars = 13
-        pd.order = ["7x7", "9x9", "11x11", "13x13", "21x21", "31x31", "51x51"]
+        pd.title = "Prediction error"
+        pd.ylabel = "Discrepancy"
+        pd.bars = 11
+        pd.legend_cols=4
+        pd.order = ["9x9", "11x11", "13x13", "21x21", "31x31"]
         print("Prediction error")
         datas = dict()
         for k, v in groups.items():
