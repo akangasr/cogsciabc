@@ -127,7 +127,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, max_sim_path_len=path_max_len)
         test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
 
-    if method in ["exact", "sample"]:
+    if method in ["exact", "sample", "sample_l"]:
         types = ["MED"]
         # hack
         from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase
