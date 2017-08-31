@@ -15,7 +15,8 @@ from elfie.reporting import run_and_report
 from elfie.params import ModelParams
 from elfirl.model import RLParams
 
-from cogsciabc.gridmodel.model import GridParams, get_model, get_dataset
+from cogsciabc.gridmodel.model import GridParams, get_model, get_dataset, discrepancy_function
+from cogsciabc.gridmodel.mdp import InitialStateUniformlyAtEdge
 from cogsciabc.log import logging_setup
 from cogsciabc.args import parse_args_grid
 
@@ -76,7 +77,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         path_max_len = 12  # limit to make exact method feasible
     else:
         path_max_len = 1000
-    training_eps = 3000 * grid_size
+    training_eps = 2000 * grid_size
 
     rl_params = RLParams(
                 n_training_episodes=training_eps,
@@ -84,8 +85,8 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 n_simulation_episodes=1000,
                 q_alpha=0.2,
                 q_w=0.5,
-                q_gamma=0.98,
-                q_iters=2,
+                q_gamma=0.99,
+                q_iters=1,
                 exp_epsilon=0.2,
                 exp_decay=1.0)
     grid_params = GridParams(
@@ -93,7 +94,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 n_features=n_features,
                 step_penalty=0.05,
                 goal_value=float(grid_size),
-                prob_rnd_move=0.1,
+                prob_rnd_move=0.05,
                 world_seed=seed,
                 initial_state="edge",
                 grid_type="walls",
@@ -129,7 +130,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
 
     # hack
     test_training_disc = discrepancy_function(InitialStateUniformlyAtEdge(grid_size), training_data, observed=[test_data])
-    logger.info("Discrepancy between test and training data was {:.4f}".format(test_training_disc[0]))
+    print("Discrepancy between test and training data was {:.4f}".format(test_training_disc[0]))
 
     if method in ["exact", "sample", "sample_l"]:
         types = ["MED"]
