@@ -283,7 +283,7 @@ def logl_discrepancy(rl, path_max_len, goal_state, transition_prob, *sim_data, o
                                                  parameters, observed[0], random_state, full=full, n_samples=n_samples)])
 
 def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
-                           parameters, observations, random_state, scale=100.0, full=True, n_samples=1000):
+                           parameters, observations, random_state, scale=1000.0, full=True, n_samples=1000):
     # Note: scaling != 1.0 will not preserve proportionality of likelihood
     # (only used as a hack to make GP implementation work, as it breaks with too large values)
     assert len(observations) > 0
@@ -292,6 +292,7 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
     precomp_obs_logprobs = dict()
     policy = rl.get_policy()
     rl.env.print_policy(policy)
+    p_s0 = 1.0 / rl.env.initial_state_generator.n_initial_states
     if full is not True:
         sim_paths = list()
         while len(sim_paths) < n_samples:
@@ -308,28 +309,25 @@ def evaluate_loglikelihood(rl, path_max_len, goal_state, transition_prob,
             continue
         #logger.info("Evaluating loglikelihood of {}..".format(obs_i))
         start_time2 = time.time()
-        n_paths = 0
-        prob_i = 0.0
+#        n_paths = 0
         if full is True:
             path_iterator = get_all_paths_for_obs(obs_i, path_max_len, rl.env, policy)
+            prob_i = 0.0
         else:
             path_iterator = sim_paths
+            prob_i = 1.0 / n_samples  # 'prior'
         for path in path_iterator:
+#            n_paths += 1
             p_obs = prob_obs(obs_i, path)
-            if full is not True and p_obs == 0:
+            if full is not True:
+                prob_i += p_obs
                 continue
-            if full is True:
-                assert p_obs > 0, "Paths should all have positive observation probability, but p({})={}"\
-                        .format(path, p_obs)
-            p_path = prob_path(path, policy, path_max_len, goal_state, transition_prob)
+            assert p_obs > 0, "Paths should all have positive observation probability, but p({})={}".format(path, p_obs)
+            p_path = prob_path(path, policy, path_max_len, goal_state, transition_prob, p_s0)
             if p_path > 0:
                 prob_i += p_obs * p_path
-            n_paths += 1
         if full is not True:
-            if n_paths == 0:
-                prob_i = 1.0 / len(sim_paths)  # TODO: what would be correct here?
-            else:
-                prob_i /= n_paths  # normalize
+            prob_i /= n_samples  # normalize
         assert 0.0 - 1e-10 < prob_i < 1.0 + 1e-10 , "Probability should be between 0 and 1 but was {}"\
                 .format(prob_i)
         logprob = np.log(prob_i)
@@ -358,7 +356,7 @@ def get_all_paths_for_obs(obs, path_max_len, env, policy=None):
     #        .format(obs.path_len, end_time-start_time))
     return PathTreeIterator(obs, paths, obs.path_len)
 
-def prob_path(path, policy, path_max_len, goal_state, transition_prob):
+def prob_path(path, policy, path_max_len, goal_state, transition_prob, p_s0):
     """ Returns the probability that 'path' would have been generated given 'policy'.
 
     Parameters
@@ -366,7 +364,7 @@ def prob_path(path, policy, path_max_len, goal_state, transition_prob):
     path : list of location tuples [(x0, y0), ..., (xn, yn)]
     policy : callable(state, action) -> p(action | state)
     """
-    logp = 0
+    logp = np.log(p_s0)
     if len(path) < path_max_len:
         assert path.transitions[-1].next_state == goal_state  # should have been be pruned
     # assume all start states equally probable
