@@ -71,13 +71,13 @@ def cs_relabeler(label):
     return label
 
 def irl_relabeler1(label):
-    if label == "A MED":
-        return "APPROX"
     if label == "A ML":
-        return "APPROX"
+        return "ABC"
+    if label == "S MED":
+        return "MC1K"
+    if label == "SL MED":
+        return "MC50K"
     if label == "E MED":
-        return "EXACT"
-    if label == "E ML":
         return "EXACT"
     if label == "R":
         return "RANDOM"
@@ -253,23 +253,21 @@ def analyse(folder, label, variant):
     if variant == "irl":
         pd = Plotdef(title="Error to ground truth",
                  ylabel="RMSE",
-                 hatches={"EXACT": "//", "APPROX": "/", "RANDOM": "."},
-                 colors={"7x7": "linen", "9x9": "wheat", "11x11": "burlywood", "13x13": "peru", "21x21": "chocolate", "31x31": "saddlebrown", "RANDOM": "maroon"},
+                 hatches={"EXACT": "*", "MC50K": "O", "MC1K": "o", "ABC": ".", "RANDOM": "\\"},
+                 colors={"9x9": "burlywood", "11x11": "peru", "21x21": "chocolate", "31x31": "saddlebrown", "RANDOM": "maroon"},
                  figsize=(7,5),
                  errbars=True,
                  legend_loc="out",
                  legend_cols=2,
                  bars=7,
-                 order=["9x9", "11x11", "13x13", "21x21", "31x31", "RANDOM"])
+                 order=["9x9", "11x11", "21x21", "31x31", "RANDOM"])
         print("Ground truth error")
         datas = dict()
         rnd = list()
         for k, v in groups.items():
             val = v.get_value_mean_std(
-                              getters = {"": lambda e: np.mean(e.MD_gt_err),
-                                         "MED": lambda e: np.mean(e.MED_gt_err),
-                                         "ML": lambda e: np.mean(e.ML_gt_err),
-                                         "MAP": lambda e: np.mean(e.MAP_gt_err)},
+                              getters = {"MED": lambda e: np.mean(e.MED_gt_err),
+                                         "ML": lambda e: np.mean(e.ML_gt_err)},
                               verbose = True)
             val = relabel(val, irl_relabeler1)
             rnd.append(val["RANDOM"])
@@ -286,15 +284,13 @@ def analyse(folder, label, variant):
         pd.ylabel = "Discrepancy"
         pd.bars = 11
         pd.legend_cols=4
-        pd.order = ["9x9", "11x11", "13x13", "21x21", "31x31"]
+        pd.order = ["9x9", "11x11", "21x21", "31x31"]
         print("Prediction error")
         datas = dict()
         for k, v in groups.items():
             val = v.get_value_mean_std(
-                              getters = {"": lambda e: np.mean(e.MD_errs),
-                                         "MED": lambda e: np.mean(e.MED_errs),
-                                         "ML": lambda e: np.mean(e.ML_errs),
-                                         "MAP": lambda e: np.mean(e.MAP_errs)},
+                              getters = {"MED": lambda e: np.mean(e.MED_errs),
+                                         "ML": lambda e: np.mean(e.ML_errs)},
                               verbose = True)
             val = relabel(val, irl_relabeler1)
             datas[k] = val
