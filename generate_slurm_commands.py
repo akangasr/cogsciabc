@@ -3,7 +3,7 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 5
+n_replicates = 20
 seed_modulo = 10000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
@@ -61,7 +61,7 @@ for script, params in scripts.items():
         if params["id"] == "me" and method not in ["bo", "grid"]:
             continue
         for samples in params["samples"]:
-            if params["id"] == "le" and method != "grid" and samples > 1296:
+            if params["id"] == "le" and method == "bo" and samples > 1296:
                 continue
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][samples]

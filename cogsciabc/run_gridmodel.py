@@ -70,7 +70,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
              },
             ])
     elfi_params = p.get_elfi_params()
-    gp_params_update_interval = cores-1  # after every batch
+    gp_params_update_interval = (cores-1)*2  # after every second batch
     parallel_batches = cores-1
     if grid_size < 12:
         path_max_len = 12  # limit to make exact method feasible
@@ -82,16 +82,16 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 n_training_episodes=training_eps,
                 n_episodes_per_epoch=500,
                 n_simulation_episodes=1000,
-                q_alpha=0.1,
+                q_alpha=0.2,
                 q_w=0.5,
                 q_gamma=0.98,
                 q_iters=2,
-                exp_epsilon=0.1,
+                exp_epsilon=0.2,
                 exp_decay=1.0)
     grid_params = GridParams(
                 grid_size=grid_size,
                 n_features=n_features,
-                step_penalty=0.1,
+                step_penalty=0.05,
                 goal_value=float(grid_size),
                 prob_rnd_move=0.1,
                 world_seed=seed,
@@ -126,6 +126,10 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         ground_truth = {"feature1_value": -0.25, "feature2_value": -0.5, "feature3_value": -0.75}
         training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, max_sim_path_len=path_max_len)
         test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
+
+    # hack
+    test_training_disc = discrepancy_function(InitialStateUniformlyAtEdge(grid_size), training_data, observed=[test_data])
+    logger.info("Discrepancy between test and training data was {:.4f}".format(test_training_disc[0]))
 
     if method in ["exact", "sample", "sample_l"]:
         types = ["MED"]

@@ -3,12 +3,12 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 10
+n_replicates = 1
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11
-for grid_size in [7, 9, 11, 21, 31]:
-    for method in ["exact", "approx", "random"]:
+for grid_size in [9, 11, 21, 31]:
+    for method in ["exact", "sample", "sample_l", "approx", "random"]:
         for n_features in [2,3]:
             if grid_size > 11 and method == "exact":
                 continue
@@ -24,8 +24,13 @@ for grid_size in [7, 9, 11, 21, 31]:
                         time = "1-00:00:00"
                     if n_features == 3:
                         time = "3-00:00:00"
-                elif method == "approx":
-                    ident = "a"
+                elif method in ["approx", "sample", "sample_l"]:
+                    if method == "approx":
+                        ident = "a"
+                    if method == "sample":
+                        ident = "s"
+                    if method == "sample_l":
+                        ident = "sl"
                     mem = 500
                     if n_features == 2:
                         if grid_size < 20:
@@ -59,20 +64,26 @@ for grid_size in [7, 9, 11, 21, 31]:
         print("")
 
 repl_start = 1
-n_replicates = 2
+n_replicates = 10
 script = "cogsciabc/cogsciabc/run_gridmodel_t.py"
 n_features = 1
 n_samples = 1
 cores = 2
 mem = 300
-for grid_size in [5,7,9,11,13]:
-    for method in ["exact", "approx"]:
+for grid_size in [5,7,9,11]:
+    for method in ["exact", "sample", "sample_l", "approx"]:
         if method == "exact":
             ident = "e"
             if grid_size < 9:
                 time = "0-01:00:00"
             else:
-                time = "1-00:00:00"
+                time = "1-12:00:00"
+        if method == "sample":
+            ident = "s"
+            time = "0-01:00:00"
+        if method == "sample_l":
+            ident = "sl"
+            time = "0-02:00:00"
         if method == "approx":
             ident = "a"
             time = "0-01:00:00"
