@@ -3,12 +3,12 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 1
+n_replicates = 40
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11
 for grid_size in [9, 11, 21, 31]:
-    for method in ["exact", "sample", "sample_l", "approx", "random"]:
+    for method in ["exact", "sample", "sample_l", "approx", "approx_l", "random"]:
         for n_features in [2,3]:
             if grid_size > 11 and method == "exact":
                 continue
@@ -24,27 +24,36 @@ for grid_size in [9, 11, 21, 31]:
                         time = "1-00:00:00"
                     if n_features == 3:
                         time = "3-00:00:00"
-                elif method in ["approx", "sample", "sample_l"]:
+                elif method in ["approx", "approx_l", "sample", "sample_l"]:
                     if method == "approx":
                         ident = "a"
+                    if method == "approx_l":
+                        ident = "al"
                     if method == "sample":
                         ident = "s"
                     if method == "sample_l":
                         ident = "sl"
-                    mem = 500
                     if n_features == 2:
-                        if grid_size < 20:
+                        if grid_size < 25:
+                            mem = 500
                             time = "0-04:00:00"
                         else:
+                            mem = 1000
+                            if method == "sample_l":
+                                mem = 3000
                             time = "1-00:00:00"
                     if n_features == 3:
                         if grid_size < 20:
+                            mem = 1000
                             time = "0-12:00:00"
                         else:
+                            mem = 2000
+                            if method == "sample_l":
+                                mem = 6000
                             time = "2-00:00:00"
                 else:
                     ident = "r"
-                    time = "0-00:20:00"
+                    time = "0-01:00:00"
                     mem = 300
                 identifier = "g{}f{}_{}_{}_{:02d}"\
                         .format(grid_size, n_features, ident, n_samples, rep+1)

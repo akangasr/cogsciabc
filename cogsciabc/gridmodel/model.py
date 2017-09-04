@@ -237,6 +237,18 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         discrepancy = elfi.Discrepancy(elfi.tools.vectorize(partial(discrepancy_function, initial_state_generator)),
                                        summary,
                                        name="discrepancy")
+    if variant == "approx_l":
+        simulator = elfi.Simulator(elfi.tools.vectorize(rl),
+                                   *elfi_p,
+                                   name="simulator")
+        summary = elfi.Summary(elfi.tools.vectorize(partial(filt_summary, path_max_len)),
+                               simulator,
+                               observed=observation,
+                               name="summary")
+        discrepancy = elfi.Discrepancy(elfi.tools.vectorize(partial(discrepancy_function, initial_state_generator, logscale=True)),
+                                       summary,
+                                       name="discrepancy")
+
     return elfi.get_current_model()
 
 
@@ -432,7 +444,7 @@ def fill_path_tree(obs, full_path_len, paths, path_max_len, env, policy=None):
         else:
             paths[obs] = tuple()
 
-def discrepancy_function(initial_state_generator, *sim_obs, observed=None):
+def discrepancy_function(initial_state_generator, *sim_obs, observed=None, logscale=False):
     features = [avg_path_len_by_start(initial_state_generator, i, observed[0])
                 for i in range(initial_state_generator.n_initial_states)]
     features_sim = [avg_path_len_by_start(initial_state_generator, i, sim_obs[0])
@@ -441,6 +453,8 @@ def discrepancy_function(initial_state_generator, *sim_obs, observed=None):
     for f, fs in zip(features, features_sim):
         disc += np.abs(f - fs)
     disc /= len(features)  # scaling
+    if logscale is True:
+        return np.array([np.log(disc)])
     return np.array([disc])
 
 def avg_path_len_by_start(initial_state_generator, start_id, obs):

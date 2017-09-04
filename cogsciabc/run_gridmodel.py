@@ -172,7 +172,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                       ground_truth=ground_truth,
                       n_cores=cores,
                       path_max_len=path_max_len)
-    if method == "approx":
+    if method in ["approx", "approx_l"]:
         types = ["ML"]
         model = get_model(method, grid_params, elfi_params, rl_params, training_data, path_max_len)
         inference_factory = BolfiFactory(model, bolfi_params)

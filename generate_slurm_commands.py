@@ -2,8 +2,8 @@ import hashlib
 
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
-repl_start = 1
-n_replicates = 20
+repl_start = 3
+n_replicates = 3
 seed_modulo = 10000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
@@ -40,7 +40,7 @@ scripts = {
              216: "3-00:00:00",
              343: "4-00:00:00",
              512: "5-00:00:00"},
-    "mem": {27:  3000,
+    "mem": {27:  4000,
             64:  4000,
             125: 4000,
             216: 5000,

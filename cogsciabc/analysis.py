@@ -83,6 +83,8 @@ def cs_relabeler(label):
 def irl_relabeler1(label):
     if label == "A ML":
         return "ABC"
+    if label == "AL ML":
+        return "ABCL"
     if label == "S MED":
         return "MC1K"
     if label == "SL MED":
