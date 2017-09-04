@@ -17,7 +17,7 @@ warnings.filterwarnings("error")
 import logging
 logger = logging.getLogger(__name__)
 
-def collect_experiments_from_directory(directory, script):
+def collect_experiments_from_directory(directory, script, verbose=False):
     print("Loading experiments from '{}'".format(directory))
     subdirs = [x[0] for x in os.walk(directory)]
     experiment_logs = dict()
@@ -29,30 +29,39 @@ def collect_experiments_from_directory(directory, script):
             continue
         m = re.match(r"{}/([A-Za-z0-9]+)_([A-Za-z0-9]+)_(\d+)_(\d+)".format(directory), subdir)
         if m is None:
-            print("skip (unknown) .. {}".format(subdir))
+            if verbose is True:
+                print("skip (unknown) .. {}".format(subdir))
         else:
             script_id, method, samples, n = m.groups()
             if fnmatch.fnmatch(script_id, script) is False:
-                print("skip ({}) .. {}".format(script_id, subdir))
+                if verbose is True:
+                    print("skip ({}) .. {}".format(script_id, subdir))
                 continue
             samples = int(samples)
             path = os.path.join(subdir, "results.json")
             if not os.path.exists(path):
-                print("no results .. {}".format(path))
+                if verbose is True:
+                    print("no results .. {}".format(path))
                 continue
             try:
                 exp = ExperimentLog(path, method, samples)
                 if script_id not in experiment_logs.keys():
                     experiment_logs[script_id] = list()
                 experiment_logs[script_id].append(exp)
-                print("ok .. {}".format(path))
+                if verbose is True:
+                    print("ok .. {}".format(path))
             except Exception as e:
-                print("error .. {}".format(path))
+                if verbose is True:
+                    print("error .. {}".format(path))
                 print(e)
     print("")
     groups = dict()
-    for k, v in experiment_logs.items():
+    for k in sorted(experiment_logs.keys()):
+        v = experiment_logs[k]
         groups[k] = ExperimentGroup(v)
+        print("{} - {} experiments loaded".format(k, len(v)))
+        for m in sorted(groups[k].methods.keys()):
+            print(" - {} - {} experiments".format(m, len(groups[k].methods[m])))
     return groups
 
 
@@ -164,25 +173,29 @@ def plot_barchart(datas, pd):
     bars = list()
     labels = list()
     i = 1
-    for label in pd.order:
+    j = 0
+    for label in pd.order_g:
         if label not in datas.keys():
-            print("Skip {}".format(label))
+            #print("Skip {}".format(label))
             continue
-            i += 1
-        for method in sorted(datas[label].keys()):
+        for method in pd.order_m:
+            if method not in datas[label].keys():
+                #print("Skip {} {}".format(label, method))
+                continue
             if label == method:
                 labels.append("{}".format(label))
             else:
                 labels.append("{} {}".format(label, method))
-            means, stds, _ = datas[label][method]
-            print(label, method)
-            bar = ax.bar(ind[i], means[0], bar_width, color=pd.colors[label],
+            means, stds, _, _ = datas[label][method]
+            #print(label, method)
+            bar = ax.bar(ind[i] + j*bar_width/2, means[0], bar_width, color=pd.colors[label],
                          hatch=pd.hatches[method], edgecolor="black", zorder=3)
             if hasattr(pd, "errbars"):
-                ax.errorbar(ind[i], means[0], fmt=" ",
+                ax.errorbar(ind[i] + j*bar_width/2, means[0], fmt=" ",
                          yerr=stds[0], ecolor="black", capsize=5, zorder=4)
             i += 1
             bars.append(bar)
+        j += 1
 
     ax.set_ylabel(pd.ylabel, fontsize=16)
     ax.set_title(pd.title, fontsize=20)
@@ -191,7 +204,7 @@ def plot_barchart(datas, pd):
     #ax.set_xticklabels([k for k in labels], fontsize=16)
     pl.tick_params(axis='x',which='both',bottom='off',top='off')
     pl.setp(ax.get_yticklabels(), fontsize=16)
-    pl.xlim(ind[0]-0.1, ind[-1]+0.1+bar_width)
+    pl.xlim(ind[0]-0.1, ind[-1]+0.1 + bar_width + j*bar_width/2)
 
     if hasattr(pd, "ylim"):
         pl.ylim(pd.ylim)
@@ -262,7 +275,7 @@ def analyse(folder, label, variant):
                                 x_getters={"": lambda e: _get_duration(e)/3600.0,
                                            "BO ML": lambda e: (_get_duration(e) + e.post_duration)/3600.0,
                                            "BO MAP": lambda e: (_get_duration(e) + e.post_duration)/3600.0},
-                                verbose=True)
+                                verbose=False)
         pred_errs = relabel(pred_errs, cs_relabeler)
         plot_trendlines(pred_errs, pd)
         #exp.plot_value_mean_std("ML value", colors, lambda e: np.exp(max(-100,e.ML_val)))
@@ -275,48 +288,56 @@ def analyse(folder, label, variant):
     if variant == "irl":
         pd = Plotdef(title="Error to ground truth",
                  ylabel="RMSE",
-                 hatches={"EXACT": "*", "MC50K": "O", "MC1K": "o", "ABC": ".", "RANDOM": "\\"},
+                 hatches={"EXACT": "*", "MC50K": "O", "MC1K": "o", "ABC": "x", "ABCL": ".", "RANDOM": "\\"},
                  colors={"9x9": "burlywood", "11x11": "peru", "21x21": "chocolate", "31x31": "saddlebrown", "RANDOM": "maroon"},
                  figsize=(7,5),
                  errbars=True,
                  legend_loc="out",
-                 legend_cols=2,
-                 bars=7,
-                 order=["9x9", "11x11", "21x21", "31x31", "RANDOM"])
+                 legend_cols=3,
+                 bars=15,
+                 order_g=["9x9", "11x11", "21x21", "31x31", "RANDOM"],
+                 order_m=["EXACT", "MC50K", "MC1K", "ABCL", "RANDOM"])
         print("Ground truth error")
         datas = dict()
         rnd = list()
         for k, v in groups.items():
             val = v.get_value_mean_std(
-                              getters = {"MED": lambda e: np.mean(e.MED_gt_err),
-                                         "ML": lambda e: np.mean(e.ML_gt_err)},
-                              verbose = True)
+                              getters = {"": lambda e: e.MD_gt_err,
+                                         "MED": lambda e: e.MED_gt_err,
+                                         "ML": lambda e: e.ML_gt_err},
+                              verbose = False)
             val = relabel(val, irl_relabeler1)
-            rnd.append(val["RANDOM"])
-            del val["RANDOM"]
+            if "RANDOM" in val.keys():
+                rnd.append(val["RANDOM"])
+                del val["RANDOM"]
             datas[k] = val
         datas = relabel(datas, irl_relabeler2)
-        print(rnd)
-        rand_mean = np.mean([r[0] for r in rnd])
-        rand_std = np.mean([r[1] for r in rnd])
-        datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None)}
+        print("Aggregating random values from {}".format(rnd))
+        if len(rnd) > 0:
+            rand_mean = np.mean([r[0] for r in rnd])
+            rand_std = np.mean([r[1] for r in rnd])
+            datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None, None)}
+        do_ttests(datas)
         plot_barchart(datas, pd)
 
         pd.title = "Prediction error"
         pd.ylabel = "Discrepancy"
-        pd.bars = 11
-        pd.legend_cols=4
+        pd.bars = 18
+        pd.legend_cols = 4
         pd.order = ["9x9", "11x11", "21x21", "31x31"]
         print("Prediction error")
         datas = dict()
         for k, v in groups.items():
             val = v.get_value_mean_std(
-                              getters = {"MED": lambda e: np.mean(e.MED_errs),
-                                         "ML": lambda e: np.mean(e.ML_errs)},
-                              verbose = True)
+                              getters = {"": lambda e: np.mean(e.MD_errs),
+                                         "MED": lambda e: np.mean(e.MED_errs),
+                                         "ML": {"a": lambda e: np.mean(e.ML_errs),
+                                                "al": lambda e: np.mean(np.exp(e.ML_errs))}},
+                              verbose = False)
             val = relabel(val, irl_relabeler1)
             datas[k] = val
         datas = relabel(datas, irl_relabeler2)
+        do_ttests(datas)
         plot_barchart(datas, pd)
 
 
