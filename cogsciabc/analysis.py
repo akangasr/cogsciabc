@@ -3,6 +3,7 @@ import os
 import re
 import fnmatch
 import numpy as np
+import scipy as sp
 
 import matplotlib
 import matplotlib.pyplot as pl
@@ -205,6 +206,27 @@ def plot_barchart(datas, pd):
               bbox_to_anchor=(0.5, -0.1), ncol=pd.legend_cols, fontsize=16)
         fig.subplots_adjust(bottom=0.5)
     pl.show()
+
+
+def do_ttests(datas):
+    for label in sorted(datas.keys()):
+        print("{}".format(label))
+        for k1 in sorted(datas[label].keys()):
+            for k2 in sorted(datas[label].keys()):
+                if k1 >= k2:
+                    continue
+                m1, s1, _, n1 = datas[label][k1]
+                m2, s2, _, n2 = datas[label][k2]
+                stat, p = sp.stats.ttest_ind_from_stats(m1, s1, n1, m2, s2, n2, equal_var=False)
+                if p < 0.001:
+                    mark = "***"
+                elif p < 0.01:
+                    mark = "**"
+                elif p < 0.05:
+                    mark = "*"
+                else:
+                    mark = ""
+                print("- T-test between {} and {}: p={:.4f} {}".format(k1, k2, float(p), mark))
 
 
 def analyse(folder, label, variant):
