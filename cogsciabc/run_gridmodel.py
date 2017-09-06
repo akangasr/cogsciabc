@@ -79,6 +79,13 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         path_max_len = 1000
     training_eps = 2000 * grid_size
 
+    if method in ["exact", "sample", "sample_l"]:
+        noisy_posterior=True
+        model_scale=-1000.0
+    else:
+        noisy_posterior=False
+        model_scale=1.0
+
     rl_params = RLParams(
                 n_training_episodes=training_eps,
                 n_episodes_per_epoch=500,
@@ -107,6 +114,8 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 kernel_scale=p.get_lengthscales(),
                 kernel_prior={"scale_E": 0.1, "scale_V": 0.3, "var_E": 5.0, "var_V": 10.0},
                 ARD=True,
+                noisy_posterior=noisy_posterior,
+                model_scale=model_scale,
                 n_samples=samples,
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
@@ -133,9 +142,9 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
     print("Discrepancy between test and training data was {:.4f}".format(test_training_disc[0]))
 
     if method in ["exact", "sample", "sample_l"]:
-        types = ["MED"]
+        types = ["MED", "LIK"]
         # hack
-        from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase
+        from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase, LikelihoodSamplesSimulationPhase
         def modified_experiment(grid_params, elfi_params, rl_params, bolfi_params,
                                 obs_data, test_data, plot_data, types, replicates, region_size,
                                 ground_truth, n_cores, path_max_len, pdf, figsize):
@@ -154,6 +163,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
             inference_task = BolfiFactory(model, bolfi_params).get()
 
             ret = PointEstimateSimulationPhase(replicates=replicates, region_size=region_size).run(inference_task, ret)
+            ret = LikelihoodSamplesSimulationPhase(replicates=replicates).run(inference_task, ret)
             ret = PlottingPhase(pdf=pdf, figsize=figsize, obs_data=obs_data, test_data=test_data, plot_data=plot_data).run(inference_task, ret)
             ret = GroundTruthErrorPhase(ground_truth=ground_truth).run(inference_task, ret)
             ret = PredictionErrorPhase(test_data=test_data).run(inference_task, ret)
@@ -173,7 +183,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                       n_cores=cores,
                       path_max_len=path_max_len)
     if method in ["approx", "approx_l"]:
-        types = ["ML"]
+        types = ["ML", "LIK"]
         model = get_model(method, grid_params, elfi_params, rl_params, training_data, path_max_len)
         inference_factory = BolfiFactory(model, bolfi_params)
         exp = partial(inference_experiment,
