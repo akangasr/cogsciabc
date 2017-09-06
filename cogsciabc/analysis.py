@@ -144,7 +144,7 @@ def plot_trendlines(datas, pd):
     #pl.rc('text', usetex=True)
     #pl.rc('font', **{'family':'sans-serif','sans-serif':['Avant Garde']})
     for label, vals in datas.items():
-        means, stds, x = vals
+        means, stds, x, ns = vals
         pl.plot(x, means, marker=pd.markers[label], color=pd.colors[label], label=label)
         if pd.errbars is True:
             pl.fill_between(x, means+stds, means-stds, facecolor=pd.colors[label], alpha=pd.alpha)
