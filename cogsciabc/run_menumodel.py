@@ -108,7 +108,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 length_observations=True,
                 p_obs_len_cur=0.95,
                 p_obs_len_adj=0.89,
-                n_training_menus=10000,
+                n_training_menus=20000,
                 max_number_of_actions_per_session=100)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),

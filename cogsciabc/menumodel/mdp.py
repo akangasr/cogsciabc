@@ -348,7 +348,7 @@ class SearchEnvironment(ParametricLoggingEnvironment):
     def getSensors(self):
         """ Returns a scalar (enumerated) measurement of the state """
         # this function should be deterministic and without side effects
-        return [self.state.__hash__()]  # needs to return a list
+        return [tuple(self.state.obs_items).__hash__()]  # needs to return a list
 
     def _semantic(self, n_groups, n_each_group, p_absent):
         n_items = n_groups * n_each_group
