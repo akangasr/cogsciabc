@@ -3,7 +3,7 @@ import hashlib
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
 repl_start = 1
-n_replicates = 40
+n_replicates = 30
 seed_modulo = 10000000
 script = "cogsciabc/cogsciabc/run_gridmodel.py"
 cores = 11
@@ -55,9 +55,9 @@ for grid_size in [9, 11, 21, 31]:
                     ident = "r"
                     time = "0-01:00:00"
                     mem = 300
-                identifier = "g{}f{}_{}_{}_{:02d}"\
+                identifier = "gl{}f{}_{}_{}_{:02d}"\
                         .format(grid_size, n_features, ident, n_samples, rep+1)
-                group_id = "g{}f{}_{}_{:02d}"\
+                group_id = "gl{}f{}_{}_{:02d}"\
                         .format(grid_size, n_features, n_samples, rep+1)
                 hsh = hashlib.sha224(bytearray(group_id, 'utf-8')).digest()
                 seed = int.from_bytes(hsh, byteorder='big') % seed_modulo
@@ -72,7 +72,7 @@ for grid_size in [9, 11, 21, 31]:
                 print("".join(cmd))
         print("")
 
-repl_start = 1
+repl_start = 5
 n_replicates = 10
 script = "cogsciabc/cogsciabc/run_gridmodel_t.py"
 n_features = 1
@@ -86,16 +86,16 @@ for grid_size in [5,7,9,11]:
             if grid_size < 9:
                 time = "0-01:00:00"
             else:
-                time = "1-12:00:00"
+                time = "2-00:00:00"
         if method == "sample":
             ident = "s"
-            time = "0-01:00:00"
+            time = "0-00:20:00"
         if method == "sample_l":
             ident = "sl"
-            time = "0-02:00:00"
+            time = "0-00:20:00"
         if method == "approx":
             ident = "a"
-            time = "0-01:00:00"
+            time = "0-00:20:00"
         for rep in range(repl_start-1, n_replicates):
             identifier = "g{}f{}t_{}_{}_{:02d}"\
                     .format(grid_size, n_features, ident, n_samples, rep+1)

@@ -104,9 +104,13 @@ def irl_relabeler2(label):
         return "9x9"
     if label == "g9f3":
         return "9x9"
+    if label == "gl9f3":
+        return "9x9"
     if label == "g11f2":
         return "11x11"
     if label == "g11f3":
+        return "11x11"
+    if label == "gl11f3":
         return "11x11"
     if label == "g13f2":
         return "13x13"
@@ -116,9 +120,13 @@ def irl_relabeler2(label):
         return "21x21"
     if label == "g21f3":
         return "21x21"
+    if label == "gl21f3":
+        return "21x21"
     if label == "g31f2":
         return "31x31"
     if label == "g31f3":
+        return "31x31"
+    if label == "gl31f3":
         return "31x31"
     if label == "g51f2":
         return "51x51"
