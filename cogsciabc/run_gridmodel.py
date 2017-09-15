@@ -73,10 +73,13 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
     elfi_params = p.get_elfi_params()
     gp_params_update_interval = (cores-1)*2  # after every second batch
     parallel_batches = cores-1
+    obs_set_size = 1000
     if grid_size < 12:
         path_max_len = 12  # limit to make exact method feasible
+        sim_set_size = 2*obs_set_size
     else:
-        path_max_len = 1000
+        path_max_len = None
+        sim_set_size = obs_set_size
     training_eps = 2000 * grid_size
 
     if method in ["exact", "sample", "sample_l"]:
@@ -89,7 +92,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
     rl_params = RLParams(
                 n_training_episodes=training_eps,
                 n_episodes_per_epoch=500,
-                n_simulation_episodes=1000,
+                n_simulation_episodes=sim_set_size,
                 q_alpha=0.2,
                 q_w=0.5,
                 q_gamma=0.99,
@@ -129,13 +132,13 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
     if n_features == 2:
         ground_truth_v = [-0.33, -0.67]
         ground_truth = {"feature1_value": -0.33, "feature2_value": -0.67}
-        training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, max_sim_path_len=path_max_len)
-        test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
+        training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, path_max_len, obs_set_size)
+        test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, path_max_len, obs_set_size)
     if n_features == 3:
         ground_truth_v = [-0.25, -0.5, -0.75]
         ground_truth = {"feature1_value": -0.25, "feature2_value": -0.5, "feature3_value": -0.75}
-        training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, max_sim_path_len=path_max_len)
-        test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, max_sim_path_len=path_max_len)
+        training_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+1, path_max_len, obs_set_size)
+        test_data = get_dataset(grid_params, elfi_params, rl_params, ground_truth_v, seed+2, path_max_len, obs_set_size)
 
     # hack
     test_training_disc = discrepancy_function(InitialStateUniformlyAtEdge(grid_size), training_data, observed=[test_data])
@@ -147,9 +150,9 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         from elfie.inference import SamplingPhase, PosteriorAnalysisPhase, PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase, LikelihoodSamplesSimulationPhase
         def modified_experiment(grid_params, elfi_params, rl_params, bolfi_params,
                                 obs_data, test_data, plot_data, types, replicates, region_size,
-                                ground_truth, n_cores, path_max_len, pdf, figsize):
+                                ground_truth, n_cores, path_max_len, obs_set_size, pdf, figsize):
             elfi.new_model()
-            model = get_model(method, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model(method, grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len, obs_set_size)
             inference_task = BolfiFactory(model, bolfi_params).get()
             ret = dict()
             ret["n_cores"] = n_cores
@@ -159,7 +162,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
             ret["plots_logl"] = inference_task.plot_post(pdf, figsize)
 
             elfi.new_model()
-            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len, obs_set_size)
             inference_task = BolfiFactory(model, bolfi_params).get()
 
             ret = PointEstimateSimulationPhase(replicates=replicates, region_size=region_size).run(inference_task, ret)
@@ -181,10 +184,11 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                       region_size=0.02,
                       ground_truth=ground_truth,
                       n_cores=cores,
-                      path_max_len=path_max_len)
+                      path_max_len=path_max_len,
+                      obs_set_size=obs_set_size)
     if method in ["approx", "approx_l"]:
         types = ["ML", "LIK"]
-        model = get_model(method, grid_params, elfi_params, rl_params, training_data, path_max_len)
+        model = get_model(method, grid_params, elfi_params, rl_params, training_data, path_max_len, obs_set_size)
         inference_factory = BolfiFactory(model, bolfi_params)
         exp = partial(inference_experiment,
                       inference_factory,
@@ -202,9 +206,9 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
         from elfie.inference import PointEstimateSimulationPhase, PlottingPhase, GroundTruthErrorPhase, PredictionErrorPhase
         def modified_experiment(grid_params, elfi_params, rl_params, bolfi_params,
                                 obs_data, test_data, plot_data, types, replicates, region_size,
-                                ground_truth, n_cores, path_max_len, seed, pdf, figsize):
+                                ground_truth, n_cores, path_max_len, obs_set_size, seed, pdf, figsize):
             elfi.new_model()
-            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len)
+            model = get_model("approx", grid_params, p.get_elfi_params(), rl_params, obs_data, path_max_len, obs_set_size)
             inference_task = BolfiFactory(model, bolfi_params).get()
             bounds = elfi_params.get_bounds()
             ret = dict()
@@ -237,6 +241,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                       ground_truth=ground_truth,
                       n_cores=cores,
                       path_max_len=path_max_len,
+                      obs_set_size=obs_set_size,
                       seed=seed)
 
     file_path = os.path.dirname(os.path.realpath(__file__))

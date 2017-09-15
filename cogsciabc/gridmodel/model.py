@@ -110,7 +110,7 @@ class PathTreeIterator():
             if path is not None:
                 return path
 
-def get_dataset(p, elfi_p, rl_p, param_values, seed, max_sim_path_len=1e10):
+def get_dataset(p, elfi_p, rl_p, param_values, seed, max_sim_path_len, obs_set_size):
     logger.info("Generating a dataset with parameters {}..".format(param_values))
     if p.initial_state == "edge":
         initial_state_generator = InitialStateUniformlyAtEdge(p.grid_size)
@@ -148,12 +148,12 @@ def get_dataset(p, elfi_p, rl_p, param_values, seed, max_sim_path_len=1e10):
     data = rl(*param_values, random_state=np.random.RandomState(seed))
     policy = rl.get_policy()
     rl.env.print_policy(policy)
-    summary = filt_summary(max_sim_path_len, data)
+    summary = filt_summary(max_sim_path_len, obs_set_size, data)
     logger.info("Dataset generated")
     print(summary)
     return summary
 
-def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
+def get_model(variant, p, elfi_p, rl_p, observation, path_max_len, obs_set_size):
     if p.initial_state == "edge":
         initial_state_generator = InitialStateUniformlyAtEdge(p.grid_size)
     elif p.initial_state == "anywhere":
@@ -191,7 +191,7 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
                                    *elfi_p,
                                    name="simulator")
-        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len)),
+        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len, obs_set_size)),
                                simulator,
                                observed=observation,
                                name="summary")
@@ -204,7 +204,7 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
                                    *elfi_p,
                                    name="simulator")
-        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len)),
+        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len, obs_set_size)),
                                simulator,
                                observed=observation,
                                name="summary")
@@ -217,7 +217,7 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         simulator = elfi.Simulator(elfi.tools.vectorize(dummy_simulator),
                                    *elfi_p,
                                    name="simulator")
-        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len)),
+        summary = elfi.Summary(elfi.tools.vectorize(partial(passthrough_summary_function, path_max_len, obs_set_size)),
                                simulator,
                                observed=observation,
                                name="summary")
@@ -230,7 +230,7 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                    *elfi_p,
                                    name="simulator")
-        summary = elfi.Summary(elfi.tools.vectorize(partial(filt_summary, path_max_len)),
+        summary = elfi.Summary(elfi.tools.vectorize(partial(filt_summary, path_max_len, obs_set_size)),
                                simulator,
                                observed=observation,
                                name="summary")
@@ -241,7 +241,7 @@ def get_model(variant, p, elfi_p, rl_p, observation, path_max_len):
         simulator = elfi.Simulator(elfi.tools.vectorize(rl),
                                    *elfi_p,
                                    name="simulator")
-        summary = elfi.Summary(elfi.tools.vectorize(partial(filt_summary, path_max_len)),
+        summary = elfi.Summary(elfi.tools.vectorize(partial(filt_summary, path_max_len, obs_set_size)),
                                simulator,
                                observed=observation,
                                name="summary")
@@ -258,9 +258,12 @@ def simulator(rl, *parameters, index_in_batch=0, random_state=None):
     rl.env.print_policy(policy)
     return ret
 
-def filt_summary(path_max_len, observations):
+def filt_summary(path_max_len, obs_set_size, observations):
     obs = summary_function(observations)
-    filt_obs = [o for o in obs if o.path_len <= path_max_len]
+    if path_max_len is None:
+        filt_obs = obs[:obs_set_size]
+    else:
+        filt_obs = [o for o in obs if o.path_len <= path_max_len][:obs_set_size]
     if len(filt_obs) < len(obs):
         logger.info("Filtered observations to be at most length {}, left {} out of {}"\
                 .format(path_max_len, len(filt_obs), len(obs)))
@@ -282,11 +285,11 @@ class DummyValue():
 def dummy_simulator(*parameters, index_in_batch=0, random_state=None):
     return DummyValue(parameters, random_state)
 
-def passthrough_summary_function(path_max_len, data):
+def passthrough_summary_function(path_max_len, obs_set_size, data):
     if isinstance(data, DummyValue):
         return data
     else:
-        return filt_summary(path_max_len, data)
+        return filt_summary(path_max_len, obs_set_size, data)
 
 def logl_discrepancy(rl, path_max_len, goal_state, transition_prob, *sim_data, observed=None, full=True, n_samples=1000):
     parameters = sim_data[0].parameters
