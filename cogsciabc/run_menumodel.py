@@ -49,11 +49,11 @@ def run_experiment(seed, method, scale, cores, samples):
          "ntics": scale,
          },
         {"name": "menu_recall_probability",
-         "distr": "truncnorm",
+         "distr": "beta",
          "minv": 0.0,
          "maxv": 1.0,
-         "mean": 0.69,
-         "std": 0.2,
+         "a": 3.0,
+         "b": 1.35,
          "acq_noise": 0.0,
          "kernel_scale": 0.1,
          "L": 10.0,
@@ -66,7 +66,7 @@ def run_experiment(seed, method, scale, cores, samples):
         ])
     if method == "bo":
         gp_params_update_interval = cores-1
-        types = ["MED", "MAP"]
+        types = ["MED", "MAP", "LIK", "POST"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
@@ -78,25 +78,28 @@ def run_experiment(seed, method, scale, cores, samples):
         parallel_batches = cores-1
     training_data = BaillyData(
                 menu_type="Semantic",
+#                allowed_users=["S24"],
+#                excluded_users=[],
                 allowed_users=[],
                 excluded_users=["S22", "S6", "S41", "S7", "S5", "S8", "S20", "S36", "S24"],
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get()  # all
     test_data = BaillyData(
                 menu_type="Semantic",
+#                allowed_users=[],
                 allowed_users=["S22", "S6", "S41", "S7", "S5", "S8", "S20", "S36", "S24"],
                 excluded_users=[],
                 trials_per_user_present=9999,  # all
                 trials_per_user_absent=9999).get()  # all
     rl_params = RLParams(
                 n_training_episodes=5000000,
-                n_episodes_per_epoch=10000,
+                n_episodes_per_epoch=1000,
                 n_simulation_episodes=10000,
                 q_alpha=0.05,
                 q_w=0.3,
-                q_gamma=0.98,
-                q_iters=2,
-                exp_epsilon=0.1,
+                q_gamma=0.99,
+                q_iters=1,
+                exp_epsilon=0.2,
                 exp_decay=1.0)
     menu_params = MenuParams(
                 menu_type="semantic",
@@ -108,7 +111,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 length_observations=True,
                 p_obs_len_cur=0.95,
                 p_obs_len_adj=0.89,
-                n_training_menus=20000,
+                n_training_menus=50000,
                 max_number_of_actions_per_session=100)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
