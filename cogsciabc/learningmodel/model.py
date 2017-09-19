@@ -105,12 +105,18 @@ class LearningModel():
 
     def __call__(self, *params, random_state=None, index_in_batch=None):
         par = [float(p) for p in params]
-        if par[0] > -2.5 or par[0] < -5.0:
+        if par[0] > -2.5 or par[0] < -4.5:
             print("RF was {}, clipping to allowed area".format(par[0]))
-            par[0] = min(max(-5.0, par[0]), -2.5)
-        if par[1] > 0.1 or par[1] < 0.001:
+            par[0] = min(max(-4.5, par[0]), -2.5)
+        if par[1] > 0.15 or par[1] < 0.001:
             print("LF was {}, clipping to allowed area".format(par[1]))
-            par[1] = min(max(0.001, par[1]), 0.1)
+            par[1] = min(max(0.001, par[1]), 0.15)
+        if par[2] > 20.0 or par[2] < 0.0:
+            print("BLC was {}, clipping to allowed area".format(par[2]))
+            par[2] = min(max(0.0, par[2]), 20.0)
+        if par[3] > 0.15 or par[3] < 0.001:
+            print("ANS was {}, clipping to allowed area".format(par[3]))
+            par[3] = min(max(0.001, par[3]), 0.15)
         print("SIM AT {}".format(par))
         for j in range(self.p.max_retries):
             try:

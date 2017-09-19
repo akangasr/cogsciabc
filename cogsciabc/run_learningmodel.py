@@ -31,22 +31,22 @@ def run_experiment(seed, method, scale, cores, samples):
     p = ModelParams([
         {"name": "RT",
          "distr": "uniform",
-         "minv": -5.0,
+         "minv": -4.5,
          "maxv": -2.5,
          "acq_noise": 0.0,
-         "kernel_scale": 0.5,  # 20% of range
-         "L": 2.0,  # 5 units / range
+         "kernel_scale": 0.4,  # 20% of range
+         "L": 2.5,  # 5 units / range
          "ntics": scale,
          },
         {"name": "LF",
          "distr": "truncnorm",
          "minv": 0.001,
-         "maxv": 0.10,
+         "maxv": 0.15,
          "mean": 0.2,
          "std": 0.2,
          "acq_noise": 0.0,
-         "kernel_scale": 0.02,  # 20% of range
-         "L": 50.0,  # 5 units / range
+         "kernel_scale": 0.03,  # 20% of range
+         "L": 33.3,  # 5 units / range
          "ntics": scale,
          },
         {"name": "BLC",
@@ -67,14 +67,14 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 0.3,
          "std": 0.2,
          "acq_noise": 0.0,
-         "kernel_scale": 0.02,  # 20% of range
-         "L": 50.0,  # 5 units / range
+         "kernel_scale": 0.03,  # 20% of range
+         "L": 33.3,  # 5 units / range
          "ntics": scale,
          }
         ])
     if method == "bo":
         gp_params_update_interval = min(5*(cores-1), samples/2)  # at least every fifth batch
-        types = ["MED", "MAP"]
+        types = ["MED", "MAP", "LIK", "POST"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
