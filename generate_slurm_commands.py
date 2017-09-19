@@ -2,8 +2,8 @@ import hashlib
 
 # Print commands for running experiments
 script_name = "./elfie/slurm/run_experiment_slurm.sh"
-repl_start = 3
-n_replicates = 3
+repl_start = 1
+n_replicates = 10
 seed_modulo = 10000000
 #methods = ["grid", "lbfgsb", "neldermead", "bo"]
 methods = ["grid", "neldermead", "bo"]
@@ -61,17 +61,25 @@ for script, params in scripts.items():
         if params["id"] == "me" and method not in ["bo", "grid"]:
             continue
         for samples in params["samples"]:
-            if params["id"] == "le" and method == "bo" and samples > 1296:
+            if params["id"] == "le" and method != "grid" and samples > 1000:
                 continue
             for rep in range(repl_start-1, n_replicates):
                 time = params["time"][samples]
-                if method == "neldermead":
-                    time = "2-00:00:00"
-                mem = params["mem"][samples]
                 cores = params["cores"]
-                scale = params["scale"][samples]
-                if method in ["lbfgsb", "neldermead"]:
+                if True or method in ["lbfgsb", "neldermead"]:
                     cores = 2  # not parallel
+                    if samples < 100:
+                        time = "0-04:00:00"
+                    elif samples < 300:
+                        time = "0-08:00:00"
+                    elif samples < 1000:
+                        time = "1-00:00:00"
+                    elif samples < 1500:
+                        time = "1-12:00:00"
+                    else:
+                        time = "2-00:00:00"
+                mem = params["mem"][samples]
+                scale = params["scale"][samples]
                 identifier = "{}_{}_{:02d}_{:02d}"\
                         .format(params["id"], method, samples, rep+1)
                 hsh = hashlib.sha224(bytearray(identifier, 'utf-8')).digest()
