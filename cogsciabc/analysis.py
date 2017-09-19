@@ -76,8 +76,16 @@ def cs_relabeler(label):
         return "BO"
     if label == "BO ML":
         return "ABC ML"
+    if label == "BO LM":
+        return "ABC LM"
+    if label == "BO PM":
+        return "ABC PM"
     if label == "BO MAP":
         return "ABC MAP"
+    if label == "BO LIK":
+        return "ABC LIK"
+    if label == "BO POST":
+        return "ABC POST"
     return label
 
 def irl_relabeler1(label):
@@ -152,10 +160,10 @@ def plot_trendlines(datas, pd):
     #pl.rc('text', usetex=True)
     #pl.rc('font', **{'family':'sans-serif','sans-serif':['Avant Garde']})
     for label, vals in datas.items():
-        means, stds, x, ns = vals
+        means, stds, x, p05s, p95s, ns = vals
         pl.plot(x, means, marker=pd.markers[label], color=pd.colors[label], label=label)
         if pd.errbars is True:
-            pl.fill_between(x, means+stds, means-stds, facecolor=pd.colors[label], alpha=pd.alpha)
+            pl.fill_between(x, p05s, p95s, facecolor=pd.colors[label], alpha=pd.alpha)
         if hasattr(pd, "ylabel"):
             pl.ylabel(pd.ylabel)
         if hasattr(pd, "xlabel"):
@@ -196,7 +204,7 @@ def plot_barchart(datas, pd):
                 labels.append("{}".format(label))
             else:
                 labels.append("{} {}".format(label, method))
-            means, stds, _, _ = datas[label][method]
+            means, stds, _, _, _, _ = datas[label][method]
             #print(label, method)
             bar = ax.bar(ind[i] + j*bar_width/2, means[0], bar_width, color=pd.colors[label],
                          hatch=pd.hatches[method], edgecolor="black", zorder=3)
@@ -238,8 +246,8 @@ def do_ttests(datas):
             for k2 in sorted(datas[label].keys()):
                 if k1 >= k2:
                     continue
-                m1, s1, _, n1 = datas[label][k1]
-                m2, s2, _, n2 = datas[label][k2]
+                m1, s1, _, _, _, n1 = datas[label][k1]
+                m2, s2, _, _, _, n2 = datas[label][k2]
                 stat, p = sp.stats.ttest_ind_from_stats(m1, s1, n1, m2, s2, n2, equal_var=False)
                 if p < 0.001:
                     mark = "***"
@@ -263,28 +271,44 @@ def analyse(folder, label, variant):
                  colors = {
                         "BO": "skyblue",
                         "ABC ML": "dodgerblue",
+                        "ABC LM": "green",
+                        #"ABC LIK": "red",
+                        "ABC PM": "black",
+                        #"ABC POST": "orange",
                         "ABC MAP": "blue",
                         "GRID": "green",
                         "NELDERMEAD": "m"},
                  markers = {
                         "BO": "o",
                         "ABC ML": "v",
+                        "ABC LM": "*",
+                        #"ABC LIK": ".",
+                        "ABC PM": "*",
+                        #"ABC POST": ".",
                         "ABC MAP": "^",
                         "GRID": "x",
                         "NELDERMEAD": "+"},
                  alpha=0.1,
                  figsize=(5,5),
                  errbars=True,
-                 legend_loc=2)
+                 legend_loc=1)
 
         pred_errs = exp.get_value_mean_std(
                                 getters= {"": lambda e: np.mean(e.MD_errs),
                                           "MED": lambda e: np.mean(e.MED_errs),
                                           "ML": lambda e: np.mean(e.ML_errs),
+                                          "LM": lambda e: np.mean(e.LM_errs),
+                                          #"LIK": lambda e: np.mean(e.lik_errs),
+                                          "PM": lambda e: np.mean(e.PM_errs),
+                                          #"POST": lambda e: np.mean(e.post_errs),
                                           "MAP": lambda e: np.mean(e.MAP_errs)},
                                 x_getters={"": lambda e: _get_duration(e)/3600.0,
-                                           "BO ML": lambda e: (_get_duration(e) + e.post_duration)/3600.0,
-                                           "BO MAP": lambda e: (_get_duration(e) + e.post_duration)/3600.0},
+                                           "ABC ML": lambda e: (_get_duration(e) + e.post_duration)/3600.0,
+                                           "ABC LM": lambda e: (_get_duration(e) + e.post_duration + e.lik_sampling_duration)/3600.0,
+                                           #"ABC LIK": lambda e: (_get_duration(e) + e.post_duration + e.lik_sampling_duration)/3600.0,
+                                           "ABC PM": lambda e: (_get_duration(e) + e.post_duration + e.post_sampling_duration)/3600.0,
+                                           #"ABC POST": lambda e: (_get_duration(e) + e.post_duration + e.post_sampling_duration)/3600.0,
+                                           "ABC MAP": lambda e: (_get_duration(e) + e.post_duration)/3600.0},
                                 verbose=False)
         pred_errs = relabel(pred_errs, cs_relabeler)
         plot_trendlines(pred_errs, pd)
@@ -326,7 +350,7 @@ def analyse(folder, label, variant):
         if len(rnd) > 0:
             rand_mean = np.mean([r[0] for r in rnd])
             rand_std = np.mean([r[1] for r in rnd])
-            datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None, None)}
+            datas["RANDOM"] = {"RANDOM": ([rand_mean], [rand_std], None, None, None, None)}
         do_ttests(datas)
         plot_barchart(datas, pd)
 
