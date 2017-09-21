@@ -73,7 +73,7 @@ def run_experiment(seed, method, scale, cores, samples):
          }
         ])
     if method == "bo":
-        gp_params_update_interval = min(5*(cores-1), samples/2)  # at least every fifth batch
+        gp_params_update_interval = 25
         types = ["MED", "MAP", "LIK", "POST"]
     else:
         gp_params_update_interval = 9999
@@ -91,7 +91,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
                 noise_var=0.005,  # based on intial tests
-                kernel_var=5.0,  # based on initial tests
+                kernel_var=1.0,  # based on initial tests
                 kernel_scale=p.get_lengthscales(),
                 L=p.get_L(),
                 ARD=True,
@@ -99,6 +99,8 @@ def run_experiment(seed, method, scale, cores, samples):
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
+                gp_params_optimizer="simplex",
+                gp_params_max_opt_iters=20,
                 abc_threshold_delta=0.01,
                 batch_size=1,
                 sampling_type=method,
