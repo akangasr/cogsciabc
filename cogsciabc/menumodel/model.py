@@ -1,3 +1,4 @@
+from functools import partial
 import numpy as np
 
 import elfi
@@ -82,7 +83,7 @@ def get_model(p, elfi_p, rl_p, observation):
                                model=model,
                                observed=observation,
                                name="simulator")
-    summary = elfi.Summary(elfi.tools.vectorize(summary_function),
+    summary = elfi.Summary(elfi.tools.vectorize(partial(summary_function, maxlen=p.max_number_of_actions_per_session)),
                            simulator,
                            model=model,
                            name="summary")
@@ -93,10 +94,35 @@ def get_model(p, elfi_p, rl_p, observation):
     return model
 
 
-def summary_function(obs):
+def summary_function(obs, maxlen=None):
     while type(obs) is not dict:
         obs = obs[0]
-    return [Observation(ses["action_duration"], ses["target_present"]) for ses in obs["sessions"]]
+    ret = list()
+    lon_p = 0
+    lon_a = 0
+    neg_p = 0
+    neg_a = 0
+    for ses in obs["sessions"]:
+        if maxlen is not None and len(ses["action_duration"]) >= maxlen:
+            if ses["target_present"] is True:
+                lon_p += 1
+            else:
+                lon_a += 1
+            continue
+        if "rewards" in ses.keys() and ses["rewards"][-1] < 0:
+            if ses["target_present"] is True:
+                neg_p += 1
+            else:
+                neg_a += 1
+            continue
+        ret.append(Observation(ses["action_duration"], ses["target_present"]))
+    if len(ret) < len(obs["sessions"]):
+        logger.info("Filtered observations, left {} out of {}".format(len(ret), len(obs["sessions"])))
+        if lon_p + lon_a > 0:
+            logger.info("Removed {} sessions that did not terminate (with {} actions or more), {} when target present, {} when absent".format(lon_p+lon_a, maxlen, lon_p, lon_a))
+        if neg_p + neg_a > 0:
+            logger.info("Removed {} sessions that were not done correctly (negative final reward), {} when target present, {} when absent".format(neg_p+neg_a, neg_p, neg_a))
+    return ret
 
 
 def discrepancy_function(*simulated, observed=None):

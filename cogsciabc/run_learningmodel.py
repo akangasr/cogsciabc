@@ -31,8 +31,8 @@ def run_experiment(seed, method, scale, cores, samples):
     p = ModelParams([
         {"name": "RT",
          "distr": "uniform",
-         "minv": -4.5,
-         "maxv": -2.5,
+         "minv": -2.60000001,
+         "maxv": -2.6,
          "acq_noise": 0.0,
          "kernel_scale": 0.4,  # 20% of range
          "L": 2.5,  # 5 units / range
@@ -40,8 +40,8 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         {"name": "LF",
          "distr": "truncnorm",
-         "minv": 0.001,
-         "maxv": 0.15,
+         "minv": 0.1,
+         "maxv": 0.1000001,
          "mean": 0.2,
          "std": 0.2,
          "acq_noise": 0.0,
@@ -51,8 +51,8 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         {"name": "BLC",
          "distr": "truncnorm",
-         "minv": 0.0,
-         "maxv": 20.0,
+         "minv": 2.0,
+         "maxv": 2.0000001,
          "mean": 10.0,
          "std": 10.0,
          "acq_noise": 0.0,
@@ -63,7 +63,7 @@ def run_experiment(seed, method, scale, cores, samples):
         {"name": "ANS",
          "distr": "truncnorm",
          "minv": 0.001,
-         "maxv": 0.15,
+         "maxv": 0.001000001,
          "mean": 0.3,
          "std": 0.2,
          "acq_noise": 0.0,
@@ -73,8 +73,8 @@ def run_experiment(seed, method, scale, cores, samples):
          }
         ])
     if method == "bo":
-        gp_params_update_interval = 25
-        types = ["MED", "MAP", "LIK", "POST"]
+        gp_params_update_interval = min(samples, 50)
+        types = ["MED", "MAP", "POST"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
@@ -90,9 +90,10 @@ def run_experiment(seed, method, scale, cores, samples):
                 bounds=p.get_bounds(),
                 grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.005,  # based on intial tests
-                kernel_var=1.0,  # based on initial tests
+                noise_var=0.0001,
+                kernel_var=1.0,
                 kernel_scale=p.get_lengthscales(),
+                kernel_prior={"scale_E": 7.5, "scale_V": 37.5, "var_E": 2.0, "var_V": 2.0, "noise_E": 0.0004, "noise_V": 0.00000004},
                 L=p.get_L(),
                 ARD=True,
                 n_samples=samples,
@@ -100,7 +101,7 @@ def run_experiment(seed, method, scale, cores, samples):
                 parallel_batches=parallel_batches,
                 gp_params_update_interval=gp_params_update_interval,
                 gp_params_optimizer="simplex",
-                gp_params_max_opt_iters=20,
+                gp_params_max_opt_iters=100,
                 abc_threshold_delta=0.01,
                 batch_size=1,
                 sampling_type=method,

@@ -190,6 +190,7 @@ class SearchEnvironment(ParametricLoggingEnvironment):
                                    "duration_saccade_ms",
                                    "action_duration",
                                    "action",
+                                   "rewards",
                                    "gaze_location",
                                    "path"]
 

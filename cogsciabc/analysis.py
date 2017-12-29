@@ -4,6 +4,8 @@ import re
 import fnmatch
 import numpy as np
 import scipy as sp
+import random
+import copy
 
 import matplotlib
 import matplotlib.pyplot as pl
@@ -44,7 +46,7 @@ def collect_experiments_from_directory(directory, script, verbose=False):
                     print("no results .. {}".format(path))
                 continue
             try:
-                exp = ExperimentLog(path, method, samples)
+                exp = ExperimentLog(path, method, samples, exclude=["MD_sim", "ML_sim", "MAP_sim", "PM_sim", "LM_sim"])
                 if script_id not in experiment_logs.keys():
                     experiment_logs[script_id] = list()
                 experiment_logs[script_id].append(exp)
@@ -66,7 +68,7 @@ def collect_experiments_from_directory(directory, script, verbose=False):
 
 
 def _get_duration(e):
-    if e.method in ["lbfgsb", "neldermead"]:
+    if e.method in ["lbfgsb", "neldermead", "neldermead (parallel)"]:
         return e.sampling_duration
     if e.method in ["grid", "bo"]:
         return e.sampling_duration * e.n_cores
@@ -238,7 +240,6 @@ def plot_barchart(datas, pd):
         fig.subplots_adjust(bottom=0.5)
     pl.show()
 
-
 def do_ttests(datas):
     for label in sorted(datas.keys()):
         print("{}".format(label))
@@ -260,13 +261,39 @@ def do_ttests(datas):
                 print("- T-test between {} and {}: p={:.4f} {}".format(k1, k2, float(p), mark))
 
 
+def simulate_parallel(eg, name, fit_value, test_value, duration, n_par):
+    print("Treating {} as if it would have been run {} processes in parallel".format(name, n_par))
+    allexp = eg.exp
+    for n_samples in eg.n_samples:
+        exp = [e for e in eg.methods[name] if e.n_samples == n_samples]
+        if len(exp) < 1:
+            continue
+        print("{} experiments where n_samples = {}".format(len(exp), n_samples))
+        vals = [(getattr(e, fit_value), getattr(e, test_value)) for e in exp]
+        for e in exp:
+            e2 = copy.deepcopy(e)
+            setattr(e2, "method", "{} (parallel)".format(name))
+            d = getattr(e, duration)
+            setattr(e2, duration, d*n_par)
+            v = random.sample(vals, n_par)
+            min_fit = None
+            min_test = None
+            for vi in v:
+                if min_fit is None or vi[0] < min_fit:
+                    min_test = vi[1]
+                    min_fit = vi[0]
+            setattr(e2, test_value, min_test)
+            allexp.append(e2)
+    return ExperimentGroup(allexp)
+
+
 def analyse(folder, label, variant):
     print("Starting analysis")
     groups = collect_experiments_from_directory(folder, label)
     if variant == "cs":
         exp = groups[label]  # assume one group
         pd = Plotdef(title="Prediction error",
-                 ylabel="RMSE",
+                 ylabel="log E",
                  xlabel="CPU-hours",
                  colors = {
                         "BO": "dodgerblue",
@@ -277,7 +304,8 @@ def analyse(folder, label, variant):
                         #"ABC POST": "orange",
                         #"ABC MAP": "blue",
                         "GRID": "green",
-                        "NELDERMEAD": "m"},
+                        "NELDERMEAD": "m",
+                        "NELDERMEAD (PARALLEL)": "r"},
                  markers = {
                         "BO": "o",
                         #"ABC ML": "v",
@@ -287,11 +315,14 @@ def analyse(folder, label, variant):
                         #"ABC POST": ".",
                         #"ABC MAP": "^",
                         "GRID": "x",
-                        "NELDERMEAD": "+"},
+                        "NELDERMEAD": "+",
+                        "NELDERMEAD (PARALLEL)": "|"},
                  alpha=0.25,
                  figsize=(5,5),
                  errbars=True,
                  legend_loc=1)
+
+        exp = simulate_parallel(exp, "neldermead", "MD_val", "MD_errs", "sampling_duration", 5)
 
         pred_errs = exp.get_value_mean_std(
                                 getters= {"": lambda e: np.mean(e.MD_errs),

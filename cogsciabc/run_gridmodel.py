@@ -115,7 +115,7 @@ def run_experiment(seed, method, grid_size, n_features, cores, samples):
                 noise_var=0.1,
                 kernel_var=10.0,
                 kernel_scale=p.get_lengthscales(),
-                kernel_prior={"scale_E": 0.1, "var_E": 0.3, "scale_V": 5.0, "var_V": 10.0},
+                kernel_prior={"scale_E": 0.1, "scale_V": 0.3, "var_E": 5.0, "var_V": 10.0},
                 ARD=True,
                 noisy_posterior=noisy_posterior,
                 model_scale=model_scale,

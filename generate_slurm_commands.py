@@ -9,21 +9,22 @@ methods = ["grid", "neldermead", "bo"]
 scripts = {
 "cogsciabc/cogsciabc/run_learningmodel.py": {
     "id": "le",
-    "samples": {"grid": [16, 81, 256, 625],
-                "neldermead": [10, 20, 30, 50, 70, 110, 150, 190],
-                "bo": [25, 50, 75, 100, 150, 200, 250]},
+    "samples": {"grid": [16, 81, 256, 625, 1296, 2401],
+                "neldermead": [20, 30, 50, 110, 200, 300, 400, 500, 700],
+                "bo": [25, 75, 150, 250, 350, 450, 550]},
     "cores": 2,
     "scale": {16: 2,
               81: 3,
               256: 4,
               625: 5,
-              1296: 6},
+              1296: 6,
+              2401: 7},
     },
 "cogsciabc/cogsciabc/run_menumodel.py": {
     "id": "me",
-    "samples": {"grid": [27, 64, 125, 216, 343],
-                "neldermead": [10, 20, 30],
-                "bo": [20, 40, 60, 80, 100, 160, 240, 300]},
+    "samples": {"grid": [27, 64, 125, 216, 343, 512],
+                "neldermead": [10, 20, 30, 40, 50],
+                "bo": [20, 60, 120, 240, 420]},
     "scale": {27: 3,
               64: 4,
               125: 5,
@@ -39,13 +40,13 @@ for script, params in scripts.items():
             for rep in range(repl_start-1, n_replicates):
                 if params["id"] == "me":
                     cores = 21
-                    mem = 5000
-                    if samples < 100:
+                    mem = 6000
+                    if samples < 80:
+                        time = "0-14:00:00"
+                    elif samples < 150:
                         time = "1-00:00:00"
-                    elif samples < 200:
-                        time = "2-00:00:00"
                     elif samples < 300:
-                        time = "3-00:00:00"
+                        time = "2-00:00:00"
                     else:
                         time = "4-00:00:00"
                     if method == "neldermead":
@@ -60,8 +61,10 @@ for script, params in scripts.items():
                         time = "0-08:00:00"
                     elif samples < 1000:
                         time = "1-00:00:00"
-                    else:
+                    elif samples < 1000:
                         time = "1-12:00:00"
+                    else:
+                        time = "2-00:00:00"
                 if samples in params["scale"]:
                     scale = params["scale"][samples]
                 else:

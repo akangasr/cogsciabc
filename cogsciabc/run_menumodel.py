@@ -33,7 +33,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 3.0,
          "std": 1.0,
          "acq_noise": 0.0,
-         "kernel_scale": 0.5,
+         "kernel_scale": 1.0,
          "L": 2.0,
          "ntics": scale,
          },
@@ -44,7 +44,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "mean": 0.3,
          "std": 0.3,
          "acq_noise": 0.0,
-         "kernel_scale": 0.1,
+         "kernel_scale": 0.2,
          "L": 10.0,
          "ntics": scale,
          },
@@ -55,7 +55,7 @@ def run_experiment(seed, method, scale, cores, samples):
          "a": 3.0,
          "b": 1.35,
          "acq_noise": 0.0,
-         "kernel_scale": 0.1,
+         "kernel_scale": 0.2,
          "L": 10.0,
          "ntics": scale,
          },
@@ -65,8 +65,8 @@ def run_experiment(seed, method, scale, cores, samples):
          },
         ])
     if method == "bo":
-        gp_params_update_interval = cores-1
-        types = ["MED", "MAP", "LIK", "POST"]
+        gp_params_update_interval = min(samples/2, 3*(cores-1))
+        types = ["MED", "MAP", "POST"]
     else:
         gp_params_update_interval = 9999
         types = ["MD"]
@@ -78,7 +78,7 @@ def run_experiment(seed, method, scale, cores, samples):
         parallel_batches = cores-1
     training_data = BaillyData(
                 menu_type="Semantic",
-#                allowed_users=["S24"],
+#                allowed_users=["S40"],
 #                excluded_users=[],
                 allowed_users=[],
                 excluded_users=["S22", "S6", "S41", "S7", "S5", "S8", "S20", "S36", "S24"],
@@ -112,21 +112,21 @@ def run_experiment(seed, method, scale, cores, samples):
                 p_obs_len_cur=0.95,
                 p_obs_len_adj=0.89,
                 n_training_menus=50000,
-                max_number_of_actions_per_session=100)
+                max_number_of_actions_per_session=15)
     bolfi_params = BolfiParams(
                 bounds=p.get_bounds(),
                 grid_tics=grid_tics,
                 acq_noise_cov=p.get_acq_noises(),
-                noise_var=0.1,
-                kernel_var=10.0,
+                noise_var=0.5,
+                kernel_var=4.0,
                 kernel_scale=p.get_lengthscales(),
-                kernel_prior={"scale_E": 0.2, "scale_V": 0.5, "var_E": 5.0, "var_V": 10.0},
+                kernel_prior={"scale_E": 2.0, "scale_V": 2.0, "var_E": 2.0, "var_V": 2.0, "noise_E": 2.0, "noise_V": 2.0},
                 ARD=True,
                 n_samples=samples,
                 n_initial_evidence=0,
                 parallel_batches=parallel_batches,
                 gp_params_optimizer="simplex",
-                gp_params_max_opt_iters=20,
+                gp_params_max_opt_iters=1000,
                 gp_params_update_interval=gp_params_update_interval,
                 observed_node_name="simulator",
                 abc_threshold_delta=0.01,
